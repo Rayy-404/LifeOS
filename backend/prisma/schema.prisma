@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ReminderStatus {
+  SCHEDULED
+  SENT
+  CANCELLED
+  FAILED
+}
+
+enum ReminderChannel {
+  LOCAL
+  PUSH
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique @db.VarChar(254)
+  passwordHash String   @map("password_hash")
+  name         String   @db.VarChar(100)
+  timezone     String   @default("Asia/Jakarta")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tasks         Task[]
+  habits        Habit[]
+  events        CalendarEvent[]
+  reminders     Reminder[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model Task {
+  id          String     @id @default(uuid()) @db.Uuid
+  userId      String     @map("user_id") @db.Uuid
+  title       String     @db.VarChar(200)
+  description String?    @db.Text
+  status      TaskStatus @default(TODO)
+  priority    Priority   @default(MEDIUM)
+  dueAt       DateTime?  @map("due_at") @db.Timestamptz(3)
+  completedAt DateTime?  @map("completed_at") @db.Timestamptz(3)
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminders Reminder[]
+
+  @@unique([id, userId])
+  @@index([userId, status, dueAt])
+  @@index([userId, createdAt])
+  @@map("tasks")
+}
+
+model Habit {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  name        String   @db.VarChar(120)
+  description String?  @db.Text
+  isActive    Boolean  @default(true) @map("is_active")
+  // ISO weekdays: 1=Monday ... 7=Sunday
+  activeDays  Int[]    @default([1, 2, 3, 4, 5, 6, 7]) @map("active_days")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs HabitLog[]
+
+  @@index([userId, isActive])
+  @@map("habits")
+}
+
+model HabitLog {
+  id          String    @id @default(uuid()) @db.Uuid
+  habitId     String    @map("habit_id") @db.Uuid
+  logDate     DateTime  @map("log_date") @db.Date
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, logDate])
+  @@index([logDate])
+  @@map("habit_logs")
+}
+
+model CalendarEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  title       String   @db.VarChar(200)
+  description String?  @db.Text
+  location    String?  @db.VarChar(300)
+  startsAt    DateTime @map("starts_at") @db.Timestamptz(3)
+  endsAt      DateTime @map("ends_at") @db.Timestamptz(3)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminders Reminder[]
+
+  @@unique([id, userId])
+  @@index([userId, startsAt])
+  @@map("calendar_events")
+}
+
+model Reminder {
+  id        String          @id @default(uuid()) @db.Uuid
+  userId    String          @map("user_id") @db.Uuid
+  taskId    String?         @map("task_id") @db.Uuid
+  eventId   String?         @map("event_id") @db.Uuid
+  remindAt  DateTime        @map("remind_at") @db.Timestamptz(3)
+  channel   ReminderChannel @default(LOCAL)
+  status    ReminderStatus  @default(SCHEDULED)
+  createdAt DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task  Task?          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  event CalendarEvent? @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, remindAt])
+  @@index([taskId])
+  @@index([eventId])
+  @@map("reminders")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("refresh_tokens")
+}
