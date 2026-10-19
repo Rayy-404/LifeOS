@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { Public } from './common/decorators/public.decorator';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { PrismaModule } from './prisma/prisma.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @ApiTags('Health')
 @Controller('health')
@@ -38,6 +39,7 @@ export class HealthController {
     ]),
     PrismaModule,
     AuthModule,
+    TasksModule,
   ],
   controllers: [HealthController],
   providers: [
