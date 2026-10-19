@@ -15,6 +15,7 @@ mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
 mobile/build/
 mobile/.metadata
+mobile/devtools_options.yaml
 
 # OS & IDE
 .DS_Store
