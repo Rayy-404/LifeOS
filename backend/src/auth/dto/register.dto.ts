@@ -8,6 +8,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { IsValidTimezone } from '../../common/decorators/is-valid-timezone.decorator';
+import { normalizeEmail } from '../auth.config';
 
 /**
  * `POST /auth/register` DTO (`03-technical-spec.md` Section 4.1).
@@ -25,7 +26,7 @@ export class RegisterDto {
 
   @ApiProperty({ example: 'rayhan@example.com', maxLength: 254 })
   @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? value.trim().toLowerCase() : value,
+    typeof value === 'string' ? normalizeEmail(value) : value,
   )
   @IsEmail()
   @MaxLength(254)

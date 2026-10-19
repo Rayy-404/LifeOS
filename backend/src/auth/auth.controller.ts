@@ -71,6 +71,7 @@ export class AuthController {
   @Public()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @Throttle(AUTH_THROTTLE)
   @ApiOperation({ summary: 'Revoke the provided refresh token (idempotent)' })
   @ApiResponse({ status: 200, description: 'Token revoked' })
   async logout(@Body() dto: RefreshTokenDto) {

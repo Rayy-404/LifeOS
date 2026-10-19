@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthenticatedUser } from '../../common/decorators/current-user.decorator';
+import { getJwtAccessSecret } from '../auth.config';
 
 export interface JwtPayload {
   sub: string;
@@ -16,9 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey:
-        configService.get<string>('JWT_ACCESS_SECRET') ??
-        'lifeos-dev-insecure-secret',
+      secretOrKey: getJwtAccessSecret(configService),
     });
   }
 

@@ -11,6 +11,7 @@ import * as argon2 from 'argon2';
 import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
+import { DUMMY_ARGON2_HASH, normalizeEmail } from './auth.config';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 
@@ -55,7 +56,7 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthSessionPayload> {
-    const email = AuthService.normalizeEmail(dto.email);
+    const email = normalizeEmail(dto.email);
 
     const existing = await this.usersService.findByEmail(email);
     if (existing) {
@@ -80,12 +81,11 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<AuthSessionPayload> {
-    const email = AuthService.normalizeEmail(dto.email);
+    const email = normalizeEmail(dto.email);
     const user = await this.usersService.findByEmail(email);
 
-    const passwordValid = user
-      ? await this.verifyPassword(user.passwordHash, dto.password)
-      : false;
+    const targetHash = user?.passwordHash ?? DUMMY_ARGON2_HASH;
+    const passwordValid = await this.verifyPassword(targetHash, dto.password);
 
     if (!user || !passwordValid) {
       throw new UnauthorizedException({
@@ -115,6 +115,10 @@ export class AuthService {
           return { kind: 'invalid' };
         }
         if (storedToken.revokedAt) {
+          await tx.refreshToken.updateMany({
+            where: { userId: storedToken.userId, revokedAt: null },
+            data: { revokedAt: now },
+          });
           return { kind: 'reuse', userId: storedToken.userId };
         }
         if (storedToken.expiresAt <= now) {
@@ -126,7 +130,11 @@ export class AuthService {
           data: { revokedAt: now },
         });
         if (rotated.count === 0) {
-          // Concurrent rotation of the same token: treat as replay.
+          // Concurrent rotation of the same token: treat as replay and revoke all active sessions atomically.
+          await tx.refreshToken.updateMany({
+            where: { userId: storedToken.userId, revokedAt: null },
+            data: { revokedAt: now },
+          });
           return { kind: 'reuse', userId: storedToken.userId };
         }
 
@@ -157,10 +165,6 @@ export class AuthService {
     );
 
     if (result.kind === 'reuse') {
-      await this.prisma.refreshToken.updateMany({
-        where: { userId: result.userId, revokedAt: null },
-        data: { revokedAt: now },
-      });
       this.logger.warn(
         `Refresh token reuse detected for user ${result.userId}; all active sessions revoked.`,
       );
@@ -284,10 +288,6 @@ export class AuthService {
       d: 86400,
     };
     return amount * (multipliers[unit] ?? 1);
-  }
-
-  private static normalizeEmail(email: string): string {
-    return email.trim().toLowerCase();
   }
 
   private static hashToken(rawToken: string): string {

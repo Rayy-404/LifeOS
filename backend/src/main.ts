@@ -10,7 +10,10 @@ async function bootstrap(): Promise<void> {
 
   app.setGlobalPrefix('api/v1');
   app.use(helmet());
-  app.enableCors();
+  const corsOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
+    : true;
+  app.enableCors({ origin: corsOrigins, credentials: true });
 
   app.useGlobalPipes(
     new ValidationPipe({

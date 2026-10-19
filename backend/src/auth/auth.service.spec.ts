@@ -141,13 +141,13 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('menolak email yang tidak terdaftar tanpa memverifikasi password', async () => {
+    it('menolak email yang tidak terdaftar dengan tetap menjalankan verifikasi dummy hash konstan', async () => {
       usersService.findByEmail.mockResolvedValue(null);
 
       await expect(
         service.login({ email: 'nobody@example.com', password: 'whatever' }),
       ).rejects.toBeInstanceOf(UnauthorizedException);
-      expect(argon2.verify).not.toHaveBeenCalled();
+      expect(argon2.verify).toHaveBeenCalledTimes(1);
     });
 
     it('menolak password yang salah', async () => {

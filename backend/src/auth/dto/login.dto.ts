@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { normalizeEmail } from '../auth.config';
 
 /**
  * `POST /auth/login` DTO (`03-technical-spec.md` Section 4.1).
@@ -8,7 +9,7 @@ import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 export class LoginDto {
   @ApiProperty({ example: 'rayhan@example.com', maxLength: 254 })
   @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? value.trim().toLowerCase() : value,
+    typeof value === 'string' ? normalizeEmail(value) : value,
   )
   @IsEmail()
   @MaxLength(254)
