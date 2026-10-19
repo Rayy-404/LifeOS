@@ -26,13 +26,23 @@ class LocalNotificationService {
     return reminderUuid.hashCode & 0x7FFFFFFF;
   }
 
+  /// Auto-detects the device's IANA timezone identifier with fallback to `Asia/Jakarta`.
+  static Future<String> detectLocalTimezone() async {
+    try {
+      final timezoneInfo = await FlutterTimezone.getLocalTimezone();
+      return timezoneInfo.identifier;
+    } catch (_) {
+      return 'Asia/Jakarta';
+    }
+  }
+
   Future<void> initialize() async {
     if (_initialized) return;
 
     tz.initializeTimeZones();
+    final timezoneId = await detectLocalTimezone();
     try {
-      final timezoneInfo = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(timezoneInfo.identifier));
+      tz.setLocalLocation(tz.getLocation(timezoneId));
     } catch (_) {
       tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
     }

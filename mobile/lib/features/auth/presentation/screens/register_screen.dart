@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/router.dart';
 import '../../../../app/theme.dart';
 import '../../../../core/errors/api_exception.dart';
+import '../../../../core/notifications/local_notification_service.dart';
 import '../auth_controller.dart';
 import '../auth_form_utils.dart';
 import '../widgets/auth_logo_badge.dart';
@@ -45,13 +45,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _detectTimezone() async {
-    var timezone = 'Asia/Jakarta';
-    try {
-      final info = await FlutterTimezone.getLocalTimezone();
-      timezone = info.identifier;
-    } catch (_) {
-      // Fall back to the backend default (Asia/Jakarta).
-    }
+    final timezone = await LocalNotificationService.detectLocalTimezone();
     if (mounted) {
       setState(() => _timezone = timezone);
     }

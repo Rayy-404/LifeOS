@@ -47,7 +47,8 @@ class AuthInterceptor extends QueuedInterceptor {
   bool _isPublicAuthEndpoint(String path) {
     return path.contains('/auth/login') ||
         path.contains('/auth/register') ||
-        path.contains('/auth/refresh');
+        path.contains('/auth/refresh') ||
+        path.contains('/auth/logout');
   }
 
   @override

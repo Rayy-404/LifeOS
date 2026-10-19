@@ -14,9 +14,8 @@ dependencies:
     sdk: flutter
 
   # Icons & UI Design System
-  cupertino_icons: ^1.0.8
   lucide_icons_flutter: ^4.0.0
-  google_fonts: 8.0.0
+  google_fonts: ^8.0.0
   flutter_svg: ^2.3.0
   shimmer: ^4.0.0
 
