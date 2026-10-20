@@ -123,8 +123,9 @@ class _HabitFormSheetState extends ConsumerState<HabitFormSheet> {
       }
 
       if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
       Navigator.of(context).pop(saved);
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text(_isEditing ? 'Habit updated' : 'Habit created'),
           duration: const Duration(seconds: 2),
@@ -178,8 +179,9 @@ class _HabitFormSheetState extends ConsumerState<HabitFormSheet> {
           .read(habitsControllerProvider.notifier)
           .deleteHabit(existing.id);
       if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Habit deleted'),
           duration: Duration(seconds: 2),

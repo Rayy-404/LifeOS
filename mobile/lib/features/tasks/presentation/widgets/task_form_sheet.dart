@@ -5,6 +5,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme.dart';
 import '../../../../core/errors/api_exception.dart';
 import '../../../../core/widgets/priority_badge.dart';
+import '../../../calendar/presentation/calendar_controller.dart';
+import '../../../dashboard/presentation/dashboard_controller.dart';
 import '../../../habits/presentation/habits_controller.dart';
 import '../../domain/task.dart';
 import '../tasks_controller.dart';
@@ -195,6 +197,15 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
               name: title.length > 120 ? title.substring(0, 120) : title,
               description: description.isEmpty ? null : description,
             );
+      } else if (_segment == _QuickAddSegment.event) {
+        final start = dueAt ?? DateTime.now().add(const Duration(hours: 1));
+        final end = start.add(const Duration(hours: 1));
+        await ref.read(calendarControllerProvider.notifier).createEvent(
+              title: title,
+              description: description.isEmpty ? null : description,
+              startsAt: start,
+              endsAt: end,
+            );
       } else {
         await notifier.createTask(
           title: title,
@@ -203,6 +214,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
           dueAt: dueAt,
         );
       }
+      ref.invalidate(dashboardControllerProvider);
       if (mounted) {
         Navigator.of(context).pop(true);
       }
