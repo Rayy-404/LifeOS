@@ -1,12 +1,21 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../storage/secure_storage_service.dart';
 
-/// Default base URL for Android Emulator -> Host NestJS backend (`03-technical-spec.md`).
-const String kDefaultApiBaseUrl = String.fromEnvironment(
-  'API_BASE_URL',
-  defaultValue: 'http://10.0.2.2:3000/api/v1',
-);
+/// Resolves the default API base URL automatically based on target platform:
+/// - Web (Chrome/Edge) & Desktop (Windows/macOS/Linux): `http://localhost:3000/api/v1`
+/// - Android Emulator: `http://10.0.2.2:3000/api/v1`
+String get kDefaultApiBaseUrl {
+  const envUrl = String.fromEnvironment('API_BASE_URL');
+  if (envUrl.isNotEmpty) {
+    return envUrl;
+  }
+  if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+    return 'http://localhost:3000/api/v1';
+  }
+  return 'http://10.0.2.2:3000/api/v1';
+}
 
 final dioProvider = Provider<Dio>((ref) {
   final secureStorage = ref.watch(secureStorageServiceProvider);

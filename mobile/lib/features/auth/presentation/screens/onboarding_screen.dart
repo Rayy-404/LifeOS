@@ -7,8 +7,7 @@ import '../../../../app/theme.dart';
 import '../onboarding_seen_controller.dart';
 import '../widgets/auth_logo_badge.dart';
 
-/// S-01 Onboarding — shown once before the first login
-/// (`DESIGN.md` S-01, `design/onboarding_revised.png`).
+/// S-01 Onboarding — matches Google Stitch `Onboarding` screen (`7cc2be025eb9448bac3243fbb79be32e`).
 class OnboardingScreen extends ConsumerWidget {
   const OnboardingScreen({super.key});
 
@@ -24,81 +23,119 @@ class OnboardingScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FF),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const AuthLogoBadge(),
-              const SizedBox(height: 36),
+              const AuthLogoBadge(size: 44),
+              const SizedBox(height: 24),
               Text.rich(
-                TextSpan(
+                const TextSpan(
                   children: [
-                    const TextSpan(text: 'Your Life, '),
+                    TextSpan(text: 'Your Life,\n'),
                     TextSpan(
-                      text: 'Organized',
+                      text: 'Organized\n',
                       style: TextStyle(color: AppColors.primary),
                     ),
-                    const TextSpan(text: ' in One Place'),
+                    TextSpan(text: 'in One Place'),
                   ],
                 ),
                 style: textTheme.headlineMedium?.copyWith(
                   fontSize: 32,
-                  height: 38 / 32,
+                  height: 1.15,
+                  letterSpacing: -0.64,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                'Track your tasks, classes, and habits — all in one calm '
-                'dashboard.',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.5,
+              const SizedBox(height: 10),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 280),
+                child: Text(
+                  'Track your tasks, classes, and habits — all in one calm dashboard.',
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
                 ),
               ),
-              const SizedBox(height: 24),
-              const Expanded(child: _IllustrationPanel()),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.navy,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(56),
+              const Expanded(
+                child: Center(
+                  child: _StitchHeroIllustration(),
                 ),
-                onPressed: () => _continue(context, ref),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Get Started'),
-                    SizedBox(width: 8),
-                    Icon(LucideIcons.arrowRight, size: 18),
+              ),
+              Container(
+                width: double.infinity,
+                height: 54,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x2E1E2140),
+                      blurRadius: 24,
+                      offset: Offset(0, 10),
+                    ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: TextButton(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.navy,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    minimumSize: const Size.fromHeight(54),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                  ),
                   onPressed: () => _continue(context, ref),
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Already have an account? ',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Get Started',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.3,
                         ),
-                        TextSpan(
-                          text: 'Log In',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w700,
+                      ),
+                      SizedBox(width: 8),
+                      Icon(LucideIcons.arrowRight, size: 20),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Center(
+                child: GestureDetector(
+                  onTap: () => _continue(context, ref),
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Already have an account? ',
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
-                        ),
-                      ],
+                          TextSpan(
+                            text: 'Log In',
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontSize: 14,
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -111,122 +148,59 @@ class OnboardingScreen extends ConsumerWidget {
   }
 }
 
-/// Illustrated placeholder panel until the final 3D illustration asset ships.
-class _IllustrationPanel extends StatelessWidget {
-  const _IllustrationPanel();
+class _StitchHeroIllustration extends StatelessWidget {
+  const _StitchHeroIllustration();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.primarySoft, Colors.white],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.cardLarge),
-      ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 340),
       child: Stack(
+        alignment: Alignment.bottomCenter,
         children: [
-          Center(
-            child: Icon(
-              LucideIcons.laptop,
-              size: 92,
-              color: AppColors.primary.withValues(alpha: 0.30),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.asset(
+              'assets/images/onboarding_hero.png',
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 280,
+                  decoration: BoxDecoration(
+                    color: AppColors.primarySoft,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      LucideIcons.laptop,
+                      size: 80,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-          const Positioned(
-            top: 20,
-            right: 16,
-            child: _FloatingChip(
-              icon: LucideIcons.circleCheck,
-              iconColor: AppColors.success,
-              iconBackground: AppColors.successPastel,
-              title: 'Daily Focus',
-              subtitle: 'On track',
-            ),
-          ),
-          const Positioned(
-            bottom: 20,
-            left: 16,
-            child: _FloatingChip(
-              icon: LucideIcons.calendar,
-              iconColor: AppColors.violet,
-              iconBackground: AppColors.violetPastel,
-              title: 'Design sprint',
-              subtitle: 'Today · 09:00',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FloatingChip extends StatelessWidget {
-  const _FloatingChip({
-    required this.icon,
-    required this.iconColor,
-    required this.iconBackground,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final Color iconColor;
-  final Color iconBackground;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.iconTile),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14151833),
-            blurRadius: 16,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: iconBackground,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 16, color: iconColor),
-          ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 56,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      const Color(0xFFF8F9FF),
+                      const Color(0xFFF8F9FF).withValues(alpha: 0.7),
+                      const Color(0xFFF8F9FF).withValues(alpha: 0.0),
+                    ],
+                  ),
                 ),
               ),
-              Text(
-                subtitle,
-                style: textTheme.labelSmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),

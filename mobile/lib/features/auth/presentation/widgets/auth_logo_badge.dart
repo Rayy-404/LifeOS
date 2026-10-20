@@ -1,34 +1,96 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme.dart';
 
-/// Rounded brand tile used across Splash, Onboarding (S-01), Login (S-02),
-/// and Register (S-03) screens (`DESIGN.md`).
+/// Rounded brand tile matching Google Stitch `Onboarding` & header logo (`#EBEBFC` with 2x2 grid).
 class AuthLogoBadge extends StatelessWidget {
-  const AuthLogoBadge({super.key, this.size = 44});
+  const AuthLogoBadge({
+    super.key,
+    this.size = 44,
+    this.accentBottomRight = false,
+  });
 
   final double size;
+  final bool accentBottomRight;
 
   @override
   Widget build(BuildContext context) {
+    final padding = size * 0.227;
+    final gap = size * 0.12;
+    final dotRadius = size * 0.09;
+
     return Container(
       width: size,
       height: size,
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(AppRadius.iconTile),
+        color: const Color(0xFFEBEBFC),
+        borderRadius: BorderRadius.circular(size * 0.36),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x335B5BF6),
-            blurRadius: 18,
-            offset: Offset(0, 6),
+            color: Color(0x0F5B5BF6),
+            blurRadius: 8,
+            offset: Offset(0, 2),
           ),
         ],
       ),
-      child: Icon(
-        LucideIcons.layoutGrid,
-        color: Colors.white,
-        size: size * 0.5,
+      child: Column(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(dotRadius),
+                    ),
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+                SizedBox(width: gap),
+                Expanded(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: accentBottomRight
+                          ? AppColors.violet
+                          : AppColors.primary,
+                      borderRadius: BorderRadius.circular(dotRadius),
+                    ),
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: gap),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(dotRadius),
+                    ),
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+                SizedBox(width: gap),
+                Expanded(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: accentBottomRight
+                          ? AppColors.success
+                          : AppColors.primary,
+                      borderRadius: BorderRadius.circular(dotRadius),
+                    ),
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

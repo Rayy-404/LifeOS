@@ -8,6 +8,10 @@ import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/onboarding_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
 import '../features/auth/presentation/screens/splash_screen.dart';
+import '../features/calendar/presentation/screens/calendar_screen.dart';
+import '../features/dashboard/presentation/screens/dashboard_screen.dart';
+import '../features/habits/presentation/screens/habits_screen.dart';
+import '../features/profile/presentation/screens/profile_statistics_screen.dart';
 import '../features/tasks/presentation/screens/tasks_screen.dart';
 import '../features/tasks/presentation/widgets/task_form_sheet.dart';
 import 'theme.dart';
@@ -22,6 +26,7 @@ abstract final class AppRoutes {
   static const String tasks = '/tasks';
   static const String calendar = '/calendar';
   static const String habits = '/habits';
+  static const String profile = '/profile';
   static const String statistics = '/statistics';
 }
 
@@ -76,6 +81,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.register,
         builder: (context, state) => const RegisterScreen(),
       ),
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (context, state) => const ProfileStatisticsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.statistics,
+        builder: (context, state) => const ProfileStatisticsScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return _MainBottomNavShell(navigationShell: navigationShell);
@@ -85,8 +98,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.dashboard,
-                builder: (context, state) =>
-                    const _DashboardPlaceholderScreen(),
+                builder: (context, state) => const DashboardScreen(),
               ),
             ],
           ),
@@ -102,11 +114,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.calendar,
-                builder: (context, state) => const _ModulePlaceholderScreen(
-                  title: 'Calendar',
-                  subtitle: 'Unified Calendar arrives in Fase 5.',
-                  icon: LucideIcons.calendar,
-                ),
+                builder: (context, state) => const CalendarScreen(),
               ),
             ],
           ),
@@ -114,11 +122,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.habits,
-                builder: (context, state) => const _ModulePlaceholderScreen(
-                  title: 'Habits',
-                  subtitle: 'Habit Tracker arrives in Fase 4.',
-                  icon: LucideIcons.flame,
-                ),
+                builder: (context, state) => const HabitsScreen(),
               ),
             ],
           ),
@@ -128,8 +132,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// Bottom Navigation Bar (`DESIGN.md` Section 5):
-/// `Home` · `Tasks` · `(+)` Center FAB · `Calendar` · `Habits`
+/// Bottom Navigation Bar matching Google Stitch `<nav>`:
+/// `Home` · `Tasks` · `(+)` Elevated Center FAB · `Calendar` · `Habits`
 class _MainBottomNavShell extends StatelessWidget {
   const _MainBottomNavShell({required this.navigationShell});
 
@@ -162,67 +166,80 @@ class _MainBottomNavShell extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: Color(0x0F5B5BF6),
-              blurRadius: 16,
+              blurRadius: 20,
               offset: Offset(0, -4),
             ),
           ],
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+          child: SizedBox(
+            height: 64,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
               children: [
-                _NavTabItem(
-                  icon: LucideIcons.house,
-                  label: 'Home',
-                  selected: currentIndex == 0,
-                  onTap: () => navigationShell.goBranch(0),
-                ),
-                _NavTabItem(
-                  icon: LucideIcons.squareCheckBig,
-                  label: 'Tasks',
-                  selected: currentIndex == 1,
-                  onTap: () => navigationShell.goBranch(1),
-                ),
-                Semantics(
-                  label: 'Quick Add Task',
-                  button: true,
-                  child: GestureDetector(
-                    onTap: () => _onQuickAdd(context),
-                    child: Container(
-                      width: 52,
-                      height: 52,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x595B5BF6),
-                            blurRadius: 16,
-                            offset: Offset(0, 6),
-                          ),
-                        ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _NavTabItem(
+                        icon: LucideIcons.house,
+                        label: 'Home',
+                        selected: currentIndex == 0,
+                        onTap: () => navigationShell.goBranch(0),
                       ),
-                      child: const Icon(
-                        LucideIcons.plus,
-                        color: Colors.white,
-                        size: 24,
+                      _NavTabItem(
+                        icon: LucideIcons.squareCheckBig,
+                        label: 'Tasks',
+                        selected: currentIndex == 1,
+                        onTap: () => navigationShell.goBranch(1),
+                      ),
+                      const SizedBox(width: 56),
+                      _NavTabItem(
+                        icon: LucideIcons.calendar,
+                        label: 'Calendar',
+                        selected: currentIndex == 2,
+                        onTap: () => navigationShell.goBranch(2),
+                      ),
+                      _NavTabItem(
+                        icon: LucideIcons.flame,
+                        label: 'Habits',
+                        selected: currentIndex == 3,
+                        onTap: () => navigationShell.goBranch(3),
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  top: -20,
+                  child: Semantics(
+                    label: 'Add Assignment or Habit',
+                    button: true,
+                    child: GestureDetector(
+                      onTap: () => _onQuickAdd(context),
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0x595B5BF6),
+                              blurRadius: 16,
+                              offset: Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          LucideIcons.plus,
+                          color: Colors.white,
+                          size: 26,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                _NavTabItem(
-                  icon: LucideIcons.calendar,
-                  label: 'Calendar',
-                  selected: currentIndex == 2,
-                  onTap: () => navigationShell.goBranch(2),
-                ),
-                _NavTabItem(
-                  icon: LucideIcons.flame,
-                  label: 'Habits',
-                  selected: currentIndex == 3,
-                  onTap: () => navigationShell.goBranch(3),
                 ),
               ],
             ),
@@ -253,150 +270,23 @@ class _NavTabItem extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: SizedBox(
+        width: 60,
+        height: 48,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 21, color: color),
-            const SizedBox(height: 4),
+            Icon(icon, size: 22, color: color),
+            const SizedBox(height: 3),
             Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontSize: 11,
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                     color: color,
                   ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Temporary dashboard placeholder (Fase 5 replaces it) with a working logout
-/// action and shortcut to My Tasks.
-class _DashboardPlaceholderScreen extends ConsumerWidget {
-  const _DashboardPlaceholderScreen();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authControllerProvider);
-    final userName = authState.user?.name ?? 'there';
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('LifeOS'),
-        actions: [
-          IconButton(
-            tooltip: 'Log out',
-            onPressed: () => ref.read(authControllerProvider.notifier).logout(),
-            icon: const Icon(LucideIcons.logOut),
-          ),
-        ],
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: AppColors.primarySoft,
-                      borderRadius: BorderRadius.circular(AppRadius.iconTile),
-                    ),
-                    child: const Icon(
-                      LucideIcons.layoutGrid,
-                      color: AppColors.primary,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Welcome, $userName',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Task Management (Fase 3) is active! Use the Tasks tab '
-                    'or the center (+) button below.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ModulePlaceholderScreen extends StatelessWidget {
-  const _ModulePlaceholderScreen({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: AppColors.primarySoft,
-                      borderRadius: BorderRadius.circular(AppRadius.iconTile),
-                    ),
-                    child: Icon(icon, color: AppColors.primary, size: 28),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ),
         ),
       ),
     );
