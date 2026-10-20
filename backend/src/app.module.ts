@@ -4,8 +4,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthModule } from './auth/auth.module';
+import { CalendarModule } from './calendar/calendar.module';
 import { Public } from './common/decorators/public.decorator';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { HabitsModule } from './habits/habits.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { TasksModule } from './tasks/tasks.module';
@@ -42,6 +44,8 @@ export class HealthController {
     AuthModule,
     TasksModule,
     HabitsModule,
+    CalendarModule,
+    DashboardModule,
   ],
   controllers: [HealthController],
   providers: [

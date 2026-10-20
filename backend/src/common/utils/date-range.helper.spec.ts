@@ -36,4 +36,28 @@ describe('DateRangeHelper', () => {
       ),
     ).toThrow();
   });
+
+  it('rejects impossible calendar dates instead of normalizing them', () => {
+    expect(() =>
+      DateRangeHelper.getDayUtcInterval('2026-02-31', 'Asia/Jakarta'),
+    ).toThrow();
+
+    expect(() =>
+      DateRangeHelper.getRangeUtcInterval(
+        '2026-02-28',
+        '2026-02-31',
+        'Asia/Jakarta',
+      ),
+    ).toThrow();
+  });
+
+  it('rejects mixed date-only and timestamp ranges', () => {
+    expect(() =>
+      DateRangeHelper.getRangeUtcInterval(
+        '2026-10-18',
+        '2026-10-19T00:00:00.000Z',
+        'Asia/Jakarta',
+      ),
+    ).toThrow();
+  });
 });

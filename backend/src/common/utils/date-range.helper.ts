@@ -50,12 +50,7 @@ export class DateRangeHelper {
     dateStr: string,
     timezone: string = 'Asia/Jakarta',
   ): UtcInterval {
-    if (!this.DATE_REGEX.test(dateStr)) {
-      throw new BadRequestException({
-        code: 'VALIDATION_ERROR',
-        message: `Invalid date format "${dateStr}". Expected YYYY-MM-DD.`,
-      });
-    }
+    this.assertValidCalendarDate(dateStr);
 
     const startUtc = this.localMidnightToUtc(dateStr, timezone);
     const nextDateStr = this.addDaysToDateString(dateStr, 1);
@@ -74,6 +69,8 @@ export class DateRangeHelper {
     timezone: string = 'Asia/Jakarta',
   ): UtcInterval {
     if (this.DATE_REGEX.test(from) && this.DATE_REGEX.test(to)) {
+      this.assertValidCalendarDate(from, 'from');
+      this.assertValidCalendarDate(to, 'to');
       if (from > to) {
         throw new BadRequestException({
           code: 'INVALID_TIME_RANGE',
@@ -84,6 +81,13 @@ export class DateRangeHelper {
       const nextAfterTo = this.addDaysToDateString(to, 1);
       const endUtc = this.localMidnightToUtc(nextAfterTo, timezone);
       return { startUtc, endUtc };
+    }
+
+    if (this.DATE_REGEX.test(from) || this.DATE_REGEX.test(to)) {
+      throw new BadRequestException({
+        code: 'VALIDATION_ERROR',
+        message: '"from" and "to" must both use YYYY-MM-DD or ISO-8601 timestamps.',
+      });
     }
 
     const startUtc = new Date(from);
@@ -101,6 +105,30 @@ export class DateRangeHelper {
       });
     }
     return { startUtc, endUtc };
+  }
+
+  private static assertValidCalendarDate(
+    dateStr: string,
+    fieldName = 'date',
+  ): void {
+    if (!this.DATE_REGEX.test(dateStr)) {
+      throw new BadRequestException({
+        code: 'VALIDATION_ERROR',
+        message: `Invalid ${fieldName} format "${dateStr}". Expected YYYY-MM-DD.`,
+      });
+    }
+
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    if (
+      isNaN(date.getTime()) ||
+      date.toISOString().slice(0, 10) !== dateStr
+    ) {
+      throw new BadRequestException({
+        code: 'VALIDATION_ERROR',
+        message: `Invalid calendar ${fieldName} "${dateStr}".`,
+      });
+    }
   }
 
   /**
