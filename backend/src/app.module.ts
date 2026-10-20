@@ -6,6 +6,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthModule } from './auth/auth.module';
 import { Public } from './common/decorators/public.decorator';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { HabitsModule } from './habits/habits.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { TasksModule } from './tasks/tasks.module';
 
@@ -40,6 +41,7 @@ export class HealthController {
     PrismaModule,
     AuthModule,
     TasksModule,
+    HabitsModule,
   ],
   controllers: [HealthController],
   providers: [
