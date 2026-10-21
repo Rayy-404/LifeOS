@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/domain/auth_state.dart';
@@ -53,7 +54,9 @@ class _ReminderSyncGateState extends ConsumerState<ReminderSyncGate>
           .syncPendingReminders();
     } catch (error) {
       // Reconciliation must never block the UI; the next resume retries.
-      debugPrint('Reminder reconciliation failed: $error');
+      if (kDebugMode) {
+        debugPrint('Reminder reconciliation failed: $error');
+      }
     } finally {
       _syncing = false;
     }

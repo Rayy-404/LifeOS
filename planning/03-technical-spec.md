@@ -441,8 +441,13 @@ Seluruh endpoint yang menerima parameter tanggal atau rentang waktu wajib mematu
 | `POST` | `/auth/register` | Membuat akun baru (email dinormalisasi ke lowercase) |
 | `POST` | `/auth/login` | Login dan mendapatkan pasangan access + refresh token |
 | `POST` | `/auth/refresh` | Rotasi atomik access & refresh token (dengan *reuse detection*) |
-| `POST` | `/auth/logout` | Mencabut refresh token aktif (`revokedAt = NOW()`) |
+| `POST` | `/auth/logout` | Mencabut refresh token aktif (`revokedAt = NOW()`) — **wajib menyertakan `Authorization: Bearer <accessToken>`** |
 | `GET` | `/auth/me` | Mendapatkan profil pengguna yang sedang login |
+
+*Catatan keamanan (audit pra-rilis Fase 7):*
+- `POST /auth/logout` **wajib terautentikasi** (bukan endpoint publik) agar refresh token yang bocor tidak bisa dipakai untuk mencabut sesi secara denial-of-service. Tanpa access token → `401 UNAUTHORIZED`.
+- Access token hanya memuat `sub` (user id). Email dan timezone selalu dibaca dari database pada setiap request, sehingga tidak ada PII di dalam payload JWT dan perubahan timezone langsung berlaku.
+- Endpoint publik yang tersisa hanya `/auth/register`, `/auth/login`, `/auth/refresh`, dan `/health`.
 
 **Aturan Validasi DTO Auth:**
 - `name`: string, trimmed, `1..100` karakter.

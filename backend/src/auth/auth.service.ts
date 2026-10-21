@@ -231,10 +231,12 @@ export class AuthService {
   }
 
   private signAccessToken(user: User): Promise<string> {
+    // Security audit F6/F7: the access token only carries the subject id.
+    // Email and timezone are resolved from the database on every request so
+    // no PII travels inside the (decodable) JWT payload and a timezone change
+    // takes effect immediately instead of after the next token rotation.
     return this.jwtService.signAsync({
       sub: user.id,
-      email: user.email,
-      timezone: user.timezone,
     });
   }
 

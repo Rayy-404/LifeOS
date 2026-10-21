@@ -1,20 +1,16 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../storage/secure_storage_service.dart';
 
-/// Resolves the default API base URL automatically based on target platform:
-/// - Web (Chrome/Edge) & Desktop (Windows/macOS/Linux): `http://localhost:3000/api/v1`
-/// - Android Emulator: `http://10.0.2.2:3000/api/v1`
+/// Resolves the default API base URL:
+/// - Default: `http://localhost:3000/api/v1` (works for Web, Desktop, and physical Android via `adb reverse tcp:3000 tcp:3000`)
+/// - Can be overridden via `--dart-define=API_BASE_URL=<url>` (e.g. `http://10.0.2.2:3000/api/v1` for Android emulator)
 String get kDefaultApiBaseUrl {
   const envUrl = String.fromEnvironment('API_BASE_URL');
   if (envUrl.isNotEmpty) {
     return envUrl;
   }
-  if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
-    return 'http://localhost:3000/api/v1';
-  }
-  return 'http://10.0.2.2:3000/api/v1';
+  return 'http://localhost:3000/api/v1';
 }
 
 final dioProvider = Provider<Dio>((ref) {
@@ -56,8 +52,7 @@ class AuthInterceptor extends QueuedInterceptor {
   bool _isPublicAuthEndpoint(String path) {
     return path.contains('/auth/login') ||
         path.contains('/auth/register') ||
-        path.contains('/auth/refresh') ||
-        path.contains('/auth/logout');
+        path.contains('/auth/refresh');
   }
 
   @override

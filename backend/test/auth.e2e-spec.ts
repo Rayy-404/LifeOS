@@ -138,6 +138,7 @@ describe('Auth (e2e) — /api/v1/auth', () => {
 
     const logout = await request(app.getHttpServer())
       .post('/api/v1/auth/logout')
+      .set('Authorization', `Bearer ${register.body.data.accessToken}`)
       .send({ refreshToken: register.body.data.refreshToken })
       .expect(200);
 
@@ -145,6 +146,18 @@ describe('Auth (e2e) — /api/v1/auth', () => {
 
     await request(app.getHttpServer())
       .post('/api/v1/auth/refresh')
+      .send({ refreshToken: register.body.data.refreshToken })
+      .expect(401);
+  });
+
+  it('POST /auth/logout — menolak tanpa access token (401)', async () => {
+    const register = await request(app.getHttpServer())
+      .post('/api/v1/auth/register')
+      .send({ name: 'Nadia 2', email: `auth-e2e-b2-${runId}@example.com`, password })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/auth/logout')
       .send({ refreshToken: register.body.data.refreshToken })
       .expect(401);
   });

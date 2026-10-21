@@ -38,8 +38,8 @@ export class HealthController {
     }),
     ThrottlerModule.forRoot([
       {
-        ttl: 60000,
-        limit: 60,
+        ttl: Number(process.env.THROTTLE_TTL_MS ?? 60_000),
+        limit: Number(process.env.THROTTLE_LIMIT ?? 60),
       },
     ]),
     PrismaModule,

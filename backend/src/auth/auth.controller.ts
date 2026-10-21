@@ -23,7 +23,12 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 
-const AUTH_THROTTLE = { default: { limit: 10, ttl: 60_000 } };
+const AUTH_THROTTLE = {
+  default: {
+    limit: Number(process.env.AUTH_THROTTLE_LIMIT ?? 10),
+    ttl: Number(process.env.AUTH_THROTTLE_TTL_MS ?? 60_000),
+  },
+};
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -68,10 +73,11 @@ export class AuthController {
     return { data: session };
   }
 
-  @Public()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @Throttle(AUTH_THROTTLE)
+  // Security audit F11: logout requires a valid access token so a leaked
+  // refresh token alone cannot be used to revoke (deny) a session.
   @ApiOperation({ summary: 'Revoke the provided refresh token (idempotent)' })
   @ApiResponse({ status: 200, description: 'Token revoked' })
   async logout(@Body() dto: RefreshTokenDto) {
