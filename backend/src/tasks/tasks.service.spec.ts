@@ -93,6 +93,11 @@ describe('TasksService', () => {
           dueAt: new Date('2026-10-20T12:00:00.000Z'),
           completedAt: null,
         },
+        include: {
+          reminders: {
+            select: { id: true, status: true },
+          },
+        },
       });
       expect(created.id).toBe(baseTask.id);
     });
@@ -114,6 +119,11 @@ describe('TasksService', () => {
           status: TaskStatus.DONE,
           completedAt: expect.any(Date),
         }),
+        include: {
+          reminders: {
+            select: { id: true, status: true },
+          },
+        },
       });
     });
   });
