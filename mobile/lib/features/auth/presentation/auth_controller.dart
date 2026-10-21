@@ -36,7 +36,7 @@ class AuthController extends Notifier<AuthState> {
       state = AuthState.authenticated(user);
     } on ApiException catch (error) {
       if (error.isNetworkError) {
-        final cachedUser = _repository.readCachedUser();
+        final cachedUser = await _repository.readCachedUser();
         if (cachedUser != null) {
           state = AuthState.authenticated(cachedUser);
           return;

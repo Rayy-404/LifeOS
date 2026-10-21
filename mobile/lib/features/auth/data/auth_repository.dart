@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/api/api_call_guard.dart';
 import '../../../core/api/api_client.dart';
-import '../../../core/errors/api_exception.dart';
 import '../../../core/storage/local_cache_service.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import '../domain/auth_session.dart';
@@ -41,7 +41,7 @@ class AuthRepository {
     required String password,
     required String timezone,
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final body = await _remoteDataSource.register(
         name: name,
         email: email,
@@ -56,7 +56,7 @@ class AuthRepository {
     required String email,
     required String password,
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final body = await _remoteDataSource.login(
         email: email,
         password: password,
@@ -66,7 +66,7 @@ class AuthRepository {
   }
 
   Future<User> me() {
-    return _guard(() async {
+    return guardApiCall(() async {
       final body = await _remoteDataSource.me();
       final user = User.fromJson(body['data'] as Map<String, dynamic>);
       await _cache.writeJson(_cachedUserKey, user.toJson());
@@ -87,8 +87,8 @@ class AuthRepository {
     }
   }
 
-  User? readCachedUser() {
-    final json = _cache.readJson(_cachedUserKey);
+  Future<User?> readCachedUser() async {
+    final json = await _cache.readJson(_cachedUserKey);
     if (json == null) {
       return null;
     }
@@ -117,13 +117,5 @@ class AuthRepository {
       refreshToken: refreshToken,
       expiresIn: (data['expiresIn'] as num?)?.toInt() ?? 900,
     );
-  }
-
-  Future<T> _guard<T>(Future<T> Function() run) async {
-    try {
-      return await run();
-    } on DioException catch (error) {
-      throw ApiException.fromDioException(error);
-    }
   }
 }

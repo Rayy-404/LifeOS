@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/api/api_call_guard.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/errors/api_exception.dart';
 import '../../../core/storage/local_cache_service.dart';
@@ -76,7 +77,7 @@ class HabitsRepository {
     } on DioException catch (error) {
       final apiException = ApiException.fromDioException(error);
       if (apiException.isNetworkError) {
-        final cached = _readCachedHabits();
+        final cached = await _readCachedHabits();
         if (cached != null) {
           return cached;
         }
@@ -91,7 +92,7 @@ class HabitsRepository {
     List<int> activeDays = const [1, 2, 3, 4, 5, 6, 7],
     bool isActive = true,
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final response = await _remoteDataSource.createHabit(
         name: name,
         description: description,
@@ -103,7 +104,7 @@ class HabitsRepository {
   }
 
   Future<Habit> getHabit(String id) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final response = await _remoteDataSource.getHabit(id);
       return Habit.fromJson(response['data'] as Map<String, dynamic>);
     });
@@ -117,7 +118,7 @@ class HabitsRepository {
     List<int>? activeDays,
     bool? isActive,
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final response = await _remoteDataSource.updateHabit(
         id,
         name: name,
@@ -131,7 +132,7 @@ class HabitsRepository {
   }
 
   Future<void> deleteHabit(String id) {
-    return _guard(() => _remoteDataSource.deleteHabit(id));
+    return guardApiCall(() => _remoteDataSource.deleteHabit(id));
   }
 
   Future<List<HabitLog>> getLogs(
@@ -139,7 +140,7 @@ class HabitsRepository {
     String? from,
     String? to,
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final response = await _remoteDataSource.getLogs(
         habitId,
         from: from,
@@ -158,7 +159,7 @@ class HabitsRepository {
     required String date,
     required bool completed,
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final response = await _remoteDataSource.checkIn(
         habitId,
         date: date,
@@ -170,8 +171,8 @@ class HabitsRepository {
     });
   }
 
-  HabitsSnapshot? _readCachedHabits() {
-    final json = _cache.readJson(_cacheKey);
+  Future<HabitsSnapshot?> _readCachedHabits() async {
+    final json = await _cache.readJson(_cacheKey);
     if (json == null) return null;
     try {
       final rawItems = (json['data'] as List<dynamic>?) ?? const [];
@@ -182,14 +183,6 @@ class HabitsRepository {
       return HabitsSnapshot(items: items, isFromCache: true);
     } catch (_) {
       return null;
-    }
-  }
-
-  Future<T> _guard<T>(Future<T> Function() action) async {
-    try {
-      return await action();
-    } on DioException catch (error) {
-      throw ApiException.fromDioException(error);
     }
   }
 }

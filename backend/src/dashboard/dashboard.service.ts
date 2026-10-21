@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CalendarEvent, Priority, Task, TaskStatus } from '@prisma/client';
 import { AuthenticatedUser } from '../common/decorators/current-user.decorator';
 import { DateRangeHelper } from '../common/utils/date-range.helper';
+import { REMINDER_SUMMARY_INCLUDE } from '../common/utils/prisma-selectors';
 import { HabitWithMetrics, HabitsService } from '../habits/habits.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { GetDashboardTodayQueryDto } from './dto/get-dashboard-today-query.dto';
@@ -60,11 +61,7 @@ export class DashboardService {
     const [allUserTasks, upcomingEvents, activeHabits] = await Promise.all([
       this.prisma.task.findMany({
         where: { userId: user.id },
-        include: {
-          reminders: {
-            select: { id: true, status: true },
-          },
-        },
+        include: REMINDER_SUMMARY_INCLUDE,
       }),
       this.prisma.calendarEvent.findMany({
         where: {

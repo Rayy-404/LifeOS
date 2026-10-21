@@ -6,6 +6,7 @@ import {
 import { CalendarEvent, Prisma, Reminder, Task } from '@prisma/client';
 import { AuthenticatedUser } from '../common/decorators/current-user.decorator';
 import { DateRangeHelper } from '../common/utils/date-range.helper';
+import { REMINDER_SUMMARY_INCLUDE } from '../common/utils/prisma-selectors';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCalendarEventDto } from './dto/create-calendar-event.dto';
 import { ListCalendarEventsQueryDto } from './dto/list-calendar-events-query.dto';
@@ -81,11 +82,7 @@ export class CalendarService {
           startsAt: { lt: endUtc },
           endsAt: { gt: startUtc },
         },
-        include: {
-          reminders: {
-            select: { id: true, status: true },
-          },
-        },
+        include: REMINDER_SUMMARY_INCLUDE,
         orderBy: { startsAt: 'asc' },
       }),
       this.prisma.task.findMany({
@@ -96,11 +93,7 @@ export class CalendarService {
             lt: endUtc,
           },
         },
-        include: {
-          reminders: {
-            select: { id: true, status: true },
-          },
-        },
+        include: REMINDER_SUMMARY_INCLUDE,
         orderBy: { dueAt: 'asc' },
       }),
     ]);
@@ -135,6 +128,11 @@ export class CalendarService {
         location: dto.location ?? null,
         startsAt,
         endsAt,
+      },
+      include: {
+        reminders: {
+          select: { id: true, status: true },
+        },
       },
     });
   }
@@ -209,6 +207,11 @@ export class CalendarService {
     return this.prisma.calendarEvent.update({
       where: { id: eventId },
       data,
+      include: {
+        reminders: {
+          select: { id: true, status: true },
+        },
+      },
     });
   }
 

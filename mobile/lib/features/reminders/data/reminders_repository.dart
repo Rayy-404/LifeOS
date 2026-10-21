@@ -1,7 +1,6 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/api/api_call_guard.dart';
 import '../../../core/api/api_client.dart';
-import '../../../core/errors/api_exception.dart';
 import '../../../core/storage/local_cache_service.dart';
 import '../domain/reminder.dart';
 import 'reminders_remote_data_source.dart';
@@ -30,31 +29,28 @@ class RemindersRepository {
   static const String _cacheKey = 'reminders_snapshot';
 
   Future<ReminderSnapshot> listReminders({ReminderStatus? status}) async {
-    try {
-      final response =
-          await _remoteDataSource.listReminders(status: status?.apiValue);
-      final rawItems = (response['data'] as List<dynamic>?) ?? const [];
-      final items = rawItems
-          .whereType<Map<String, dynamic>>()
-          .map(Reminder.fromJson)
-          .toList();
+    return guardApiCallWithCacheFallback<ReminderSnapshot>(
+      action: () async {
+        final response =
+            await _remoteDataSource.listReminders(status: status?.apiValue);
+        final rawItems = (response['data'] as List<dynamic>?) ?? const [];
+        final items = rawItems
+            .whereType<Map<String, dynamic>>()
+            .map(Reminder.fromJson)
+            .toList();
 
-      final snapshot = ReminderSnapshot(items: items);
-      if (status == null) {
-        await _cache.writeJson(
-          _cacheKey,
-          {'data': items.map((item) => item.toJson()).toList()},
-        );
-      }
-      return snapshot;
-    } on DioException catch (error) {
-      final apiException = ApiException.fromDioException(error);
-      if (apiException.isNetworkError && status == null) {
-        final cached = _readCachedReminders();
-        if (cached != null) return cached;
-      }
-      throw apiException;
-    }
+        final snapshot = ReminderSnapshot(items: items);
+        if (status == null) {
+          await _cache.writeJson(
+            _cacheKey,
+            {'data': items.map((item) => item.toJson()).toList()},
+          );
+        }
+        return snapshot;
+      },
+      // Cache hanya dipakai untuk daftar penuh (tanpa filter status).
+      readCache: status == null ? _readCachedReminders : _noCachedReminders,
+    );
   }
 
   Future<Reminder> createReminder({
@@ -62,7 +58,7 @@ class RemindersRepository {
     String? eventId,
     required DateTime remindAt,
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final response = await _remoteDataSource.createReminder(
         taskId: taskId,
         eventId: eventId,
@@ -77,7 +73,7 @@ class RemindersRepository {
     DateTime? remindAt,
     ReminderStatus? status,
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final response = await _remoteDataSource.updateReminder(
         id,
         remindAt: remindAt,
@@ -88,11 +84,11 @@ class RemindersRepository {
   }
 
   Future<void> deleteReminder(String id) {
-    return _guard(() => _remoteDataSource.deleteReminder(id));
+    return guardApiCall(() => _remoteDataSource.deleteReminder(id));
   }
 
-  ReminderSnapshot? _readCachedReminders() {
-    final json = _cache.readJson(_cacheKey);
+  Future<ReminderSnapshot?> _readCachedReminders() async {
+    final json = await _cache.readJson(_cacheKey);
     if (json == null) return null;
     try {
       final rawItems = (json['data'] as List<dynamic>?) ?? const [];
@@ -108,11 +104,5 @@ class RemindersRepository {
     }
   }
 
-  Future<T> _guard<T>(Future<T> Function() action) async {
-    try {
-      return await action();
-    } on DioException catch (error) {
-      throw ApiException.fromDioException(error);
-    }
-  }
+  Future<ReminderSnapshot?> _noCachedReminders() async => null;
 }

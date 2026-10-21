@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/api/api_call_guard.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/errors/api_exception.dart';
 import '../../../core/notifications/local_notification_service.dart';
@@ -74,7 +75,7 @@ class CalendarRepository {
     } on DioException catch (error) {
       final apiException = ApiException.fromDioException(error);
       if (apiException.isNetworkError) {
-        final cached = _readCachedAgenda();
+        final cached = await _readCachedAgenda();
         if (cached != null) {
           return cached;
         }
@@ -90,7 +91,7 @@ class CalendarRepository {
     required DateTime startsAt,
     required DateTime endsAt,
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final response = await _remoteDataSource.createEvent(
         title: title,
         description: description,
@@ -103,7 +104,7 @@ class CalendarRepository {
   }
 
   Future<CalendarEvent> getEvent(String id) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final response = await _remoteDataSource.getEvent(id);
       return CalendarEvent.fromJson(response['data'] as Map<String, dynamic>);
     });
@@ -119,7 +120,7 @@ class CalendarRepository {
     DateTime? startsAt,
     DateTime? endsAt,
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final response = await _remoteDataSource.updateEvent(
         id,
         title: title,
@@ -138,7 +139,7 @@ class CalendarRepository {
     String id, {
     List<String> reminderIdsToCancel = const [],
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       for (final reminderId in reminderIdsToCancel) {
         await _notifications.cancelReminder(reminderId);
       }
@@ -146,8 +147,8 @@ class CalendarRepository {
     });
   }
 
-  CalendarAgendaSnapshot? _readCachedAgenda() {
-    final json = _cache.readJson(_cacheKey);
+  Future<CalendarAgendaSnapshot?> _readCachedAgenda() async {
+    final json = await _cache.readJson(_cacheKey);
     if (json == null) return null;
     try {
       final rawEvents = (json['events'] as List<dynamic>?) ?? const [];
@@ -167,14 +168,6 @@ class CalendarRepository {
       );
     } catch (_) {
       return null;
-    }
-  }
-
-  Future<T> _guard<T>(Future<T> Function() action) async {
-    try {
-      return await action();
-    } on DioException catch (error) {
-      throw ApiException.fromDioException(error);
     }
   }
 }

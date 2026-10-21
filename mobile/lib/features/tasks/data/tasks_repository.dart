@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/api/api_call_guard.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/errors/api_exception.dart';
 import '../../../core/notifications/local_notification_service.dart';
@@ -82,7 +83,7 @@ class TasksRepository {
     } on DioException catch (error) {
       final apiException = ApiException.fromDioException(error);
       if (apiException.isNetworkError) {
-        final cached = _readCachedTasks();
+        final cached = await _readCachedTasks();
         if (cached != null) {
           return cached;
         }
@@ -98,7 +99,7 @@ class TasksRepository {
     TaskPriority priority = TaskPriority.medium,
     DateTime? dueAt,
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final response = await _remoteDataSource.createTask(
         title: title,
         description: description,
@@ -111,7 +112,7 @@ class TasksRepository {
   }
 
   Future<Task> getTask(String id) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final response = await _remoteDataSource.getTask(id);
       return Task.fromJson(response['data'] as Map<String, dynamic>);
     });
@@ -128,7 +129,7 @@ class TasksRepository {
     bool includeNullDueAt = false,
     List<String> reminderIdsToCancelOnDone = const [],
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       final response = await _remoteDataSource.updateTask(
         id,
         title: title,
@@ -155,7 +156,7 @@ class TasksRepository {
     String id, {
     List<String> reminderIds = const [],
   }) {
-    return _guard(() async {
+    return guardApiCall(() async {
       await _remoteDataSource.deleteTask(id);
       for (final reminderId in reminderIds) {
         await _notifications.cancelReminder(reminderId);
@@ -163,8 +164,8 @@ class TasksRepository {
     });
   }
 
-  PaginatedTasks? _readCachedTasks() {
-    final json = _cache.readJson(_cacheKey);
+  Future<PaginatedTasks?> _readCachedTasks() async {
+    final json = await _cache.readJson(_cacheKey);
     if (json == null) return null;
     try {
       final rawItems = (json['data'] as List<dynamic>?) ?? const [];
@@ -183,14 +184,6 @@ class TasksRepository {
       );
     } catch (_) {
       return null;
-    }
-  }
-
-  Future<T> _guard<T>(Future<T> Function() run) async {
-    try {
-      return await run();
-    } on DioException catch (error) {
-      throw ApiException.fromDioException(error);
     }
   }
 }

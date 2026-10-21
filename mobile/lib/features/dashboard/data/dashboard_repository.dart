@@ -1,7 +1,6 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/api/api_call_guard.dart';
 import '../../../core/api/api_client.dart';
-import '../../../core/errors/api_exception.dart';
 import '../../../core/storage/local_cache_service.dart';
 import '../domain/dashboard_summary.dart';
 import 'dashboard_remote_data_source.dart';
@@ -30,28 +29,22 @@ class DashboardRepository {
   static const String _cacheKey = 'dashboard_snapshot';
 
   Future<DashboardSnapshot> getToday({String? date}) async {
-    try {
-      final response = await _remoteDataSource.getToday(date: date);
-      final data =
-          (response['data'] as Map<String, dynamic>?) ?? const {};
-      final snapshot = DashboardSnapshot.fromJson(data);
+    return guardApiCallWithCacheFallback<DashboardSnapshot>(
+      action: () async {
+        final response = await _remoteDataSource.getToday(date: date);
+        final data =
+            (response['data'] as Map<String, dynamic>?) ?? const {};
+        final snapshot = DashboardSnapshot.fromJson(data);
 
-      await _cache.writeJson(_cacheKey, snapshot.toJson());
-      return snapshot;
-    } on DioException catch (error) {
-      final apiException = ApiException.fromDioException(error);
-      if (apiException.isNetworkError) {
-        final cached = _readCachedDashboard();
-        if (cached != null) {
-          return cached;
-        }
-      }
-      throw apiException;
-    }
+        await _cache.writeJson(_cacheKey, snapshot.toJson());
+        return snapshot;
+      },
+      readCache: _readCachedDashboard,
+    );
   }
 
-  DashboardSnapshot? _readCachedDashboard() {
-    final json = _cache.readJson(_cacheKey);
+  Future<DashboardSnapshot?> _readCachedDashboard() async {
+    final json = await _cache.readJson(_cacheKey);
     if (json == null) return null;
     try {
       return DashboardSnapshot.fromJson(json, isFromCache: true);

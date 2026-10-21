@@ -13,6 +13,7 @@ import {
 } from '@prisma/client';
 import { AuthenticatedUser } from '../common/decorators/current-user.decorator';
 import { DateRangeHelper } from '../common/utils/date-range.helper';
+import { REMINDER_SUMMARY_INCLUDE } from '../common/utils/prisma-selectors';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { ListTasksQueryDto } from './dto/list-tasks-query.dto';
@@ -98,11 +99,7 @@ export class TasksService {
         where,
         skip,
         take: limit,
-        include: {
-          reminders: {
-            select: { id: true, status: true },
-          },
-        },
+        include: REMINDER_SUMMARY_INCLUDE,
         orderBy: [
           { dueAt: { sort: 'asc', nulls: 'last' } },
           { priority: 'desc' },
@@ -138,6 +135,11 @@ export class TasksService {
         priority: dto.priority ?? Priority.MEDIUM,
         dueAt: dto.dueAt ? new Date(dto.dueAt) : null,
         completedAt,
+      },
+      include: {
+        reminders: {
+          select: { id: true, status: true },
+        },
       },
     });
   }
@@ -225,6 +227,7 @@ export class TasksService {
       return tx.task.update({
         where: { id: taskId },
         data,
+        include: REMINDER_SUMMARY_INCLUDE,
       });
     });
   }
