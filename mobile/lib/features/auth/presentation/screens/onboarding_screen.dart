@@ -82,6 +82,7 @@ class OnboardingScreen extends ConsumerWidget {
                   ],
                 ),
                 child: ElevatedButton(
+                  key: const ValueKey('onboarding_get_started'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.navy,
                     foregroundColor: Colors.white,

@@ -348,6 +348,7 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
               ),
               const SizedBox(height: 14),
               TextFormField(
+                key: const ValueKey('event_form_title'),
                 controller: _titleController,
                 textInputAction: TextInputAction.next,
                 maxLength: 200,
@@ -583,6 +584,7 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
+                  key: const ValueKey('event_form_save'),
                   onPressed: _isSaving ? null : _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,

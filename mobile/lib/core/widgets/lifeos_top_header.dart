@@ -65,6 +65,7 @@ class LifeOsTopHeader extends ConsumerWidget {
               ),
             ),
             IconButton(
+              key: const ValueKey('header_bell'),
               onPressed: onNotificationsTap ??
                   () => context.push(AppRoutes.reminders),
               tooltip: 'Notifications',
@@ -76,6 +77,7 @@ class LifeOsTopHeader extends ConsumerWidget {
             ),
             const SizedBox(width: 2),
             GestureDetector(
+              key: const ValueKey('header_avatar'),
               onTap: () => context.go(AppRoutes.profile),
               behavior: HitTestBehavior.opaque,
               child: Container(

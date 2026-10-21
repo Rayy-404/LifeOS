@@ -223,6 +223,7 @@ class _MainBottomNavShell extends StatelessWidget {
                     label: 'Add Assignment or Habit',
                     button: true,
                     child: GestureDetector(
+                      key: const ValueKey('nav_add_task_fab'),
                       onTap: () => _onQuickAdd(context),
                       child: Container(
                         width: 56,

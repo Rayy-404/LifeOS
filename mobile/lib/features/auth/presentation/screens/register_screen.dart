@@ -133,6 +133,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
               const SizedBox(height: 32),
               AuthTextField(
+                key: const ValueKey('register_name'),
                 controller: _nameController,
                 hintText: 'Full name',
                 leadingIcon: LucideIcons.user,
@@ -141,6 +142,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
               const SizedBox(height: 16),
               AuthTextField(
+                key: const ValueKey('register_email'),
                 controller: _emailController,
                 hintText: 'you@example.com',
                 leadingIcon: LucideIcons.mail,
@@ -150,6 +152,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
               const SizedBox(height: 16),
               AuthTextField(
+                key: const ValueKey('register_password'),
                 controller: _passwordController,
                 hintText: 'Password (min. 8 karakter)',
                 leadingIcon: LucideIcons.lock,
@@ -162,6 +165,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               _TimezoneChip(timezone: _timezone),
               const SizedBox(height: 24),
               ElevatedButton(
+                key: const ValueKey('register_submit'),
                 onPressed: _isSubmitting ? null : _submit,
                 child: _isSubmitting
                     ? const SizedBox(

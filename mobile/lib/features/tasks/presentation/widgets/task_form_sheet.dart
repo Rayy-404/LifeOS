@@ -4,13 +4,13 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme.dart';
 import '../../../../core/errors/api_exception.dart';
-import '../../../../core/widgets/priority_badge.dart';
 import '../../../calendar/domain/calendar_event.dart';
 import '../../../calendar/presentation/calendar_controller.dart';
 import '../../../habits/presentation/habits_controller.dart';
 import '../../../reminders/presentation/reminders_controller.dart';
 import '../../domain/task.dart';
 import '../tasks_controller.dart';
+import 'task_form_sections.dart';
 
 /// S-06 Quick Add / Task Form Bottom Sheet — matches Google Stitch `Quick Add Task` (`a71488fb9bbb4369b67242342dbe17e9`).
 class TaskFormSheet extends ConsumerStatefulWidget {
@@ -43,18 +43,12 @@ class TaskFormSheet extends ConsumerStatefulWidget {
 
 enum _QuickAddSegment { task, event, habit }
 
-class _CategoryOption {
-  const _CategoryOption(this.label, this.icon);
-  final String label;
-  final IconData icon;
-}
-
 class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
-  static const _categories = <_CategoryOption>[
-    _CategoryOption('Academic', LucideIcons.graduationCap),
-    _CategoryOption('Project', LucideIcons.laptop),
-    _CategoryOption('Personal', LucideIcons.user),
-    _CategoryOption('Organization', LucideIcons.users),
+  static const _categories = <TaskFormCategoryOption>[
+    TaskFormCategoryOption('Academic', LucideIcons.graduationCap),
+    TaskFormCategoryOption('Project', LucideIcons.laptop),
+    TaskFormCategoryOption('Personal', LucideIcons.user),
+    TaskFormCategoryOption('Organization', LucideIcons.users),
   ];
 
   late final TextEditingController _titleController;
@@ -466,6 +460,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextField(
+                      key: const ValueKey('task_form_title'),
                       controller: _titleController,
                       onChanged: (_) => setState(() {}),
                       textInputAction: TextInputAction.next,
@@ -671,245 +666,21 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            // Priority Selector
-            Text(
-              'Priority',
-              style: textTheme.titleSmall?.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: TaskPriority.values.map((priority) {
-                final selected = _priority == priority;
-                final fg = PriorityBadge.foregroundFor(priority);
-                final bg = PriorityBadge.backgroundFor(priority);
-
-                return Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      right: priority != TaskPriority.high ? 8 : 0,
-                    ),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(AppRadius.pill),
-                      onTap: () => setState(() => _priority = priority),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 160),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: selected ? fg : bg,
-                          borderRadius: BorderRadius.circular(AppRadius.pill),
-                          boxShadow: selected
-                              ? [
-                                  BoxShadow(
-                                    color: fg.withValues(alpha: 0.28),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: selected ? Colors.white : fg,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              priority.label,
-                              style: textTheme.labelMedium?.copyWith(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: selected ? Colors.white : fg,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
+            TaskFormPrioritySelector(
+              selected: _priority,
+              onChanged: (value) => setState(() => _priority = value),
             ),
             const SizedBox(height: 16),
-            // Category Selector Chips
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Category',
-                  style: textTheme.titleSmall?.copyWith(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Text(
-                  '+ New Tag',
-                  style: textTheme.labelSmall?.copyWith(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: _categories.map((cat) {
-                  final selected = _selectedCategory == cat.label;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(AppRadius.pill),
-                      onTap: () => setState(() => _selectedCategory = cat.label),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 160),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: selected
-                              ? const Color(0xFF413EDC)
-                              : AppColors.surfaceMuted,
-                          borderRadius: BorderRadius.circular(AppRadius.pill),
-                          boxShadow: selected
-                              ? const [
-                                  BoxShadow(
-                                    color: Color(0x335B5BF6),
-                                    blurRadius: 8,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              cat.icon,
-                              size: 15,
-                              color: selected
-                                  ? Colors.white
-                                  : AppColors.textSecondary,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              cat.label,
-                              style: textTheme.labelMedium?.copyWith(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: selected
-                                    ? Colors.white
-                                    : AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
+            TaskFormCategorySelector(
+              categories: _categories,
+              selected: _selectedCategory,
+              onChanged: (value) =>
+                  setState(() => _selectedCategory = value),
             ),
             const SizedBox(height: 14),
-            // Remind me Toggle Card
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF2F3FA),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: const BoxDecoration(
-                          color: AppColors.skyPastel,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          LucideIcons.bellRing,
-                          size: 18,
-                          color: AppColors.sky,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Remind me',
-                            style: textTheme.titleSmall?.copyWith(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          Text(
-                            '15 minutes before due',
-                            style: textTheme.labelSmall?.copyWith(
-                              fontSize: 11,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  GestureDetector(
-                    onTap: () => setState(() => _remindMe = !_remindMe),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      width: 48,
-                      height: 28,
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: _remindMe
-                            ? AppColors.primary
-                            : const Color(0xFFE1E2E9),
-                        borderRadius: BorderRadius.circular(AppRadius.pill),
-                      ),
-                      alignment: _remindMe
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Container(
-                        width: 24,
-                        height: 24,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          _remindMe ? LucideIcons.check : LucideIcons.x,
-                          size: 12,
-                          color: _remindMe
-                              ? AppColors.primary
-                              : AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            RemindMeToggle(
+              value: _remindMe,
+              onChanged: (value) => setState(() => _remindMe = value),
             ),
             const SizedBox(height: 18),
             // Bottom Action Button ("Save Task")
@@ -927,6 +698,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                 ],
               ),
               child: ElevatedButton(
+                key: const ValueKey('task_form_save'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,

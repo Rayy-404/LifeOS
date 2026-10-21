@@ -103,6 +103,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 32),
               AuthTextField(
+                key: const ValueKey('login_email'),
                 controller: _emailController,
                 hintText: 'you@example.com',
                 leadingIcon: LucideIcons.mail,
@@ -112,6 +113,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 16),
               AuthTextField(
+                key: const ValueKey('login_password'),
                 controller: _passwordController,
                 hintText: 'Password',
                 leadingIcon: LucideIcons.lock,
@@ -122,6 +124,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
+                key: const ValueKey('login_submit'),
                 onPressed: _isSubmitting ? null : _submit,
                 child: _isSubmitting
                     ? const SizedBox(

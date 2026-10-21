@@ -18,7 +18,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e:ui": "jest --config ./test/jest-e2e.json --watchAll --verbose",
+    "test:e2e:ci": "node ./test/run-e2e-ci.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
