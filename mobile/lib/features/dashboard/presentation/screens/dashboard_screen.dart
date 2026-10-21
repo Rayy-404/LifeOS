@@ -349,7 +349,8 @@ class DashboardScreen extends ConsumerWidget {
                             label: 'Statistics',
                             bgColor: AppColors.pinkPastel,
                             iconColor: AppColors.pink,
-                            onTap: () => context.go(AppRoutes.profile),
+                            onTap: () =>
+                                context.push(AppRoutes.statistics),
                           ),
                         ],
                       ),

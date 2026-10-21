@@ -66,6 +66,17 @@ class LocalNotificationService {
     return granted ?? false;
   }
 
+  /// Read-only permission probe used by startup/reconciliation
+  /// (`03-technical-spec.md` §3.2 item 5) without prompting the user again.
+  Future<bool> areNotificationsEnabled() async {
+    final androidImplementation = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (androidImplementation == null) return false;
+    return await androidImplementation.areNotificationsEnabled() ?? false;
+  }
+
   Future<void> scheduleReminder({
     required String reminderUuid,
     required String title,
@@ -97,6 +108,10 @@ class LocalNotificationService {
   Future<void> cancelReminder(String reminderUuid) async {
     final id = notificationIdFromUuid(reminderUuid);
     await _plugin.cancel(id: id);
+  }
+
+  Future<void> cancelById(int notificationId) async {
+    await _plugin.cancel(id: notificationId);
   }
 
   Future<void> cancelAll() async {

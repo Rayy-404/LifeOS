@@ -4,8 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme.dart';
 import '../../../../core/errors/api_exception.dart';
-import '../calendar_controller.dart';
+import '../../../calendar/presentation/calendar_controller.dart';
 import '../../domain/calendar_event.dart';
+import '../../../reminders/presentation/reminders_controller.dart';
 
 /// Create / Edit Calendar Event Bottom Sheet (`DESIGN.md` S-07 & `06-implementation-workflow-and-prompts.md` §6.5 #6).
 /// Enforces `endsAt > startsAt` on client and server.
@@ -49,6 +50,8 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
   late DateTime _selectedDate;
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
+  bool _remindMe = true;
+  String? _reminderNotice;
   bool _isSaving = false;
   String? _errorMessage;
 
@@ -144,6 +147,7 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
     setState(() {
       _isSaving = true;
       _errorMessage = null;
+      _reminderNotice = null;
     });
 
     final title = _titleController.text.trim();
@@ -174,13 +178,18 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
         );
       }
 
+      await _syncReminderSafely(saved);
+
       if (!mounted) return;
       final messenger = ScaffoldMessenger.of(context);
+      final notice = _reminderNotice;
       Navigator.of(context).pop(saved);
       messenger.showSnackBar(
         SnackBar(
-          content: Text(_isEditing ? 'Event updated' : 'Event created'),
-          duration: const Duration(seconds: 2),
+          content: Text(
+            notice ?? (_isEditing ? 'Event updated' : 'Event created'),
+          ),
+          duration: Duration(seconds: notice == null ? 2 : 4),
         ),
       );
     } on ApiException catch (e) {
@@ -195,6 +204,41 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
         _isSaving = false;
         _errorMessage = 'Failed to save event. Please try again.';
       });
+    }
+  }
+
+  /// Creates/moves/cancels the 15-minute local reminder for the saved event.
+  /// Reminder failures never roll back the already-persisted event.
+  Future<void> _syncReminderSafely(CalendarEvent saved) async {
+    final reminders = ref.read(remindersControllerProvider.notifier);
+    try {
+      if (!_remindMe) {
+        await reminders.cancelScheduledForTarget(eventId: saved.id);
+        return;
+      }
+
+      final remindAt = saved.startsAt.subtract(const Duration(minutes: 15));
+      if (!remindAt.isAfter(DateTime.now())) {
+        await reminders.cancelScheduledForTarget(eventId: saved.id);
+        _reminderNotice =
+            'Event saved. Reminder not scheduled because the start time is '
+            'less than 15 minutes away.';
+        return;
+      }
+
+      final result = await reminders.upsertForEvent(
+        eventId: saved.id,
+        title: saved.title,
+        remindAt: remindAt,
+      );
+      if (result != null && !result.permissionGranted) {
+        _reminderNotice =
+            'Event saved, but notification permission is off. Enable it in '
+            'Android Settings → Apps → LifeOS → Notifications.';
+      }
+    } on ApiException catch (error) {
+      _reminderNotice = 'Event saved, but the reminder failed: '
+          '${error.message}';
     }
   }
 
@@ -466,6 +510,62 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide.none,
                   ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: const BoxDecoration(
+                            color: AppColors.skyPastel,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            LucideIcons.bellRing,
+                            size: 18,
+                            color: AppColors.sky,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Remind me',
+                              style: textTheme.titleSmall?.copyWith(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              '15 minutes before start',
+                              style: textTheme.labelSmall?.copyWith(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Switch(
+                      value: _remindMe,
+                      activeThumbColor: AppColors.primary,
+                      onChanged: (value) => setState(() => _remindMe = value),
+                    ),
+                  ],
                 ),
               ),
               if (_errorMessage != null) ...[

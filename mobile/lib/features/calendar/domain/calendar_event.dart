@@ -93,6 +93,9 @@ class CalendarEvent extends Equatable {
         'endsAt': endsAt.toUtc().toIso8601String(),
         'createdAt': createdAt.toUtc().toIso8601String(),
         'updatedAt': updatedAt.toUtc().toIso8601String(),
+        'reminders': reminderIds
+            .map((id) => <String, dynamic>{'id': id})
+            .toList(growable: false),
       };
 
   @override

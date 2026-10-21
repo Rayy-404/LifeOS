@@ -65,7 +65,8 @@ class LifeOsTopHeader extends ConsumerWidget {
               ),
             ),
             IconButton(
-              onPressed: onNotificationsTap,
+              onPressed: onNotificationsTap ??
+                  () => context.push(AppRoutes.reminders),
               tooltip: 'Notifications',
               icon: const Icon(
                 LucideIcons.bell,

@@ -5,8 +5,10 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme.dart';
 import '../../../../core/errors/api_exception.dart';
 import '../../../../core/widgets/priority_badge.dart';
+import '../../../calendar/domain/calendar_event.dart';
 import '../../../calendar/presentation/calendar_controller.dart';
 import '../../../habits/presentation/habits_controller.dart';
+import '../../../reminders/presentation/reminders_controller.dart';
 import '../../domain/task.dart';
 import '../tasks_controller.dart';
 
@@ -66,6 +68,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
   DateTime? _dueDate;
   TimeOfDay? _dueTime;
   String? _titleError;
+  String? _reminderNotice;
   bool _isSubmitting = false;
 
   bool get _isEditing => widget.initialTask != null;
@@ -172,6 +175,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
 
     setState(() {
       _titleError = null;
+      _reminderNotice = null;
       _isSubmitting = true;
     });
 
@@ -181,7 +185,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
 
     try {
       if (_isEditing) {
-        await notifier.updateTask(
+        final saved = await notifier.updateTask(
           widget.initialTask!,
           title: title,
           description: description.isEmpty ? null : description,
@@ -191,6 +195,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
           dueAt: dueAt,
           includeNullDueAt: dueAt == null,
         );
+        await _syncTaskReminderSafely(saved);
       } else if (_segment == _QuickAddSegment.habit) {
         await ref.read(habitsControllerProvider.notifier).createHabit(
               name: title.length > 120 ? title.substring(0, 120) : title,
@@ -199,22 +204,32 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
       } else if (_segment == _QuickAddSegment.event) {
         final start = dueAt ?? DateTime.now().add(const Duration(hours: 1));
         final end = start.add(const Duration(hours: 1));
-        await ref.read(calendarControllerProvider.notifier).createEvent(
-              title: title,
-              description: description.isEmpty ? null : description,
-              startsAt: start,
-              endsAt: end,
-            );
+        final savedEvent =
+            await ref.read(calendarControllerProvider.notifier).createEvent(
+                  title: title,
+                  description: description.isEmpty ? null : description,
+                  startsAt: start,
+                  endsAt: end,
+                );
+        await _syncEventReminderSafely(savedEvent);
       } else {
-        await notifier.createTask(
+        final saved = await notifier.createTask(
           title: title,
           description: description.isEmpty ? null : description,
           priority: _priority,
           dueAt: dueAt,
         );
+        await _syncTaskReminderSafely(saved);
       }
       if (mounted) {
+        final notice = _reminderNotice;
+        final messenger = ScaffoldMessenger.of(context);
         Navigator.of(context).pop(true);
+        if (notice != null) {
+          messenger.showSnackBar(
+            SnackBar(content: Text(notice), duration: const Duration(seconds: 4)),
+          );
+        }
       }
     } on ApiException catch (error) {
       if (!mounted) return;
@@ -230,6 +245,80 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
       if (mounted) {
         setState(() => _isSubmitting = false);
       }
+    }
+  }
+
+  /// Keeps the reminder in sync after a task is created/updated without
+  /// failing the already-persisted task (`03-technical-spec.md` §3.2).
+  Future<void> _syncTaskReminderSafely(Task saved) async {
+    final controller = ref.read(remindersControllerProvider.notifier);
+    final dueAt = saved.dueAt;
+
+    try {
+      if (!_remindMe ||
+          dueAt == null ||
+          saved.status == TaskStatus.done) {
+        await controller.cancelScheduledForTarget(taskId: saved.id);
+        return;
+      }
+
+      final remindAt = dueAt.subtract(const Duration(minutes: 15));
+      if (!remindAt.isAfter(DateTime.now())) {
+        await controller.cancelScheduledForTarget(taskId: saved.id);
+        _reminderNotice =
+            'Task disimpan. Pengingat tidak dijadwalkan karena waktunya '
+            'kurang dari 15 menit lagi.';
+        return;
+      }
+
+      final result = await controller.upsertForTask(
+        taskId: saved.id,
+        title: saved.title,
+        remindAt: remindAt,
+      );
+      if (result != null && !result.permissionGranted) {
+        _reminderNotice =
+            'Task disimpan, tetapi izin notifikasi nonaktif. Aktifkan di '
+            'Pengaturan Android → Apps → LifeOS → Notifications.';
+      }
+    } on ApiException catch (error) {
+      _reminderNotice = 'Task disimpan, tetapi pengingat gagal: '
+          '${error.message}';
+    }
+  }
+
+  /// Event-mode variant of `_syncTaskReminderSafely` for Quick Add → Event.
+  Future<void> _syncEventReminderSafely(CalendarEvent saved) async {
+    final controller = ref.read(remindersControllerProvider.notifier);
+
+    try {
+      if (!_remindMe) {
+        await controller.cancelScheduledForTarget(eventId: saved.id);
+        return;
+      }
+
+      final remindAt = saved.startsAt.subtract(const Duration(minutes: 15));
+      if (!remindAt.isAfter(DateTime.now())) {
+        await controller.cancelScheduledForTarget(eventId: saved.id);
+        _reminderNotice =
+            'Event disimpan. Pengingat tidak dijadwalkan karena waktunya '
+            'kurang dari 15 menit lagi.';
+        return;
+      }
+
+      final result = await controller.upsertForEvent(
+        eventId: saved.id,
+        title: saved.title,
+        remindAt: remindAt,
+      );
+      if (result != null && !result.permissionGranted) {
+        _reminderNotice =
+            'Event disimpan, tetapi izin notifikasi nonaktif. Aktifkan di '
+            'Pengaturan Android → Apps → LifeOS → Notifications.';
+      }
+    } on ApiException catch (error) {
+      _reminderNotice = 'Event disimpan, tetapi pengingat gagal: '
+          '${error.message}';
     }
   }
 

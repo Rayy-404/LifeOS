@@ -12,6 +12,7 @@ import '../features/calendar/presentation/screens/calendar_screen.dart';
 import '../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../features/habits/presentation/screens/habits_screen.dart';
 import '../features/profile/presentation/screens/profile_statistics_screen.dart';
+import '../features/reminders/presentation/screens/reminders_screen.dart';
 import '../features/tasks/presentation/screens/tasks_screen.dart';
 import '../features/tasks/presentation/widgets/task_form_sheet.dart';
 import 'theme.dart';
@@ -28,6 +29,7 @@ abstract final class AppRoutes {
   static const String habits = '/habits';
   static const String profile = '/profile';
   static const String statistics = '/statistics';
+  static const String reminders = '/reminders';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -88,6 +90,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.statistics,
         builder: (context, state) => const ProfileStatisticsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.reminders,
+        builder: (context, state) => const RemindersScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
