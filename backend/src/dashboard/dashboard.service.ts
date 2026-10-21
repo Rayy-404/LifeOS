@@ -60,6 +60,11 @@ export class DashboardService {
     const [allUserTasks, upcomingEvents, activeHabits] = await Promise.all([
       this.prisma.task.findMany({
         where: { userId: user.id },
+        include: {
+          reminders: {
+            select: { id: true, status: true },
+          },
+        },
       }),
       this.prisma.calendarEvent.findMany({
         where: {

@@ -81,6 +81,11 @@ export class CalendarService {
           startsAt: { lt: endUtc },
           endsAt: { gt: startUtc },
         },
+        include: {
+          reminders: {
+            select: { id: true, status: true },
+          },
+        },
         orderBy: { startsAt: 'asc' },
       }),
       this.prisma.task.findMany({
@@ -89,6 +94,11 @@ export class CalendarService {
           dueAt: {
             gte: startUtc,
             lt: endUtc,
+          },
+        },
+        include: {
+          reminders: {
+            select: { id: true, status: true },
           },
         },
         orderBy: { dueAt: 'asc' },

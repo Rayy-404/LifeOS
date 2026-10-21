@@ -98,6 +98,11 @@ export class TasksService {
         where,
         skip,
         take: limit,
+        include: {
+          reminders: {
+            select: { id: true, status: true },
+          },
+        },
         orderBy: [
           { dueAt: { sort: 'asc', nulls: 'last' } },
           { priority: 'desc' },

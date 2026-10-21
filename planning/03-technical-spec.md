@@ -525,10 +525,12 @@ Seluruh endpoint yang menerima parameter tanggal atau rentang waktu wajib mematu
     "dueAt": "2026-10-20T12:00:00.000Z",
     "completedAt": null,
     "createdAt": "2026-10-18T12:00:00.000Z",
-    "updatedAt": "2026-10-18T12:00:00.000Z"
+    "updatedAt": "2026-10-18T12:00:00.000Z",
+    "reminders": []
   }
 }
 ```
+*Additive field:* `GET /tasks` dan `GET /tasks/:id` menyertakan `reminders: [{ "id": "uuid", "status": "SCHEDULED" }]` agar klien dapat membatalkan notifikasi lokal setelah task selesai/dihapus tanpa request tambahan. Response `POST`/`PATCH /tasks` juga boleh menyertakan array tersebut (kosong bila belum ada reminder).
 
 ### 4.3 Habit Tracker
 
@@ -594,7 +596,8 @@ Seluruh endpoint yang menerima parameter tanggal atau rentang waktu wajib mematu
         "description": null,
         "location": "Rumah",
         "startsAt": "2026-10-18T01:00:00.000Z",
-        "endsAt": "2026-10-18T03:00:00.000Z"
+        "endsAt": "2026-10-18T03:00:00.000Z",
+        "reminders": []
       }
     ],
     "tasks": [
@@ -604,13 +607,16 @@ Seluruh endpoint yang menerima parameter tanggal atau rentang waktu wajib mematu
         "title": "Menyelesaikan proyek Flutter",
         "status": "TODO",
         "priority": "HIGH",
-        "dueAt": "2026-10-18T05:00:00.000Z"
+        "dueAt": "2026-10-18T05:00:00.000Z",
+        "reminders": [
+          { "id": "reminder-uuid", "status": "SCHEDULED" }
+        ]
       }
     ]
   }
 }
 ```
-*Daftar `events` diurutkan berdasarkan `startsAt ASC`, sedangkan `tasks` diurutkan berdasarkan `dueAt ASC`.*
+*Daftar `events` diurutkan berdasarkan `startsAt ASC`, sedangkan `tasks` diurutkan berdasarkan `dueAt ASC`.* *Additive field:* setiap event/task pada agenda menyertakan ringkasan `reminders`, sehingga penghapusan/penyelesaian dari layar Calendar dapat membatalkan alarm lokal dengan `notificationId` deterministik yang sama seperti `GET /reminders`.
 
 ### 4.5 Reminder
 
@@ -640,17 +646,31 @@ Seluruh endpoint yang menerima parameter tanggal atau rentang waktu wajib mematu
     "channel": "LOCAL",
     "status": "SCHEDULED",
     "createdAt": "2026-10-18T12:00:00.000Z",
-    "updatedAt": "2026-10-18T12:00:00.000Z"
+    "updatedAt": "2026-10-18T12:00:00.000Z",
+    "task": {
+      "id": "task-uuid",
+      "title": "Menyelesaikan proyek Flutter",
+      "status": "TODO",
+      "dueAt": "2026-10-20T12:00:00.000Z"
+    },
+    "event": null
   }
 }
 ```
+
+**Aturan & error `POST/PATCH /reminders`:**
+- Tepat satu dari `taskId`/`eventId` wajib diisi; jika keduanya kosong atau keduanya terisi → `400` dengan `code = REMINDER_TARGET_XOR_VIOLATION`.
+- `remindAt` wajib ISO-8601 dan **strictly greater than `NOW()`**, baik pada `POST` maupun saat `PATCH` mengubah `remindAt`; jika tidak → `400` dengan `code = INVALID_REMINDER_TIME`.
+- Target task/event yang tidak ada **atau milik user lain** → `404` dengan `code = RESOURCE_NOT_FOUND` (Zero IDOR). Reminder milik user lain pada `PATCH`/`DELETE` juga `404`.
+- `PATCH` yang mengirim `remindAt` baru di masa depan otomatis mengeset `status = SCHEDULED`; `PATCH` tanpa `remindAt` dapat mengubah `status`/`channel` saja.
+- Semua response list/create/update menyertakan ringkasan target `task` **atau** `event` (`id`, `title`, status/waktu) agar S-10/reminder list dapat menampilkan judul tanpa request tambahan.
 
 ### 4.6 Dashboard dan Statistik
 
 | Method | Endpoint | Fungsi |
 | :--- | :--- | :--- |
 | `GET` | `/dashboard/today?date=YYYY-MM-DD` | Ringkasan harian terpadu (ditafsirkan dalam `user.timezone`) |
-| `GET` | `/statistics/overview?from=YYYY-MM-DD&to=YYYY-MM-DD` | Statistik agregat dalam rentang tanggal `[from, to)` |
+| `GET` | `/statistics/overview?from=YYYY-MM-DD&to=YYYY-MM-DD` | Statistik agregat untuk tanggal `from` s/d `to` (inklusif, dikonversi ke interval UTC setengah-terbuka `[start, end+1 hari)`) |
 | `GET` | `/statistics/weekly?weekStart=YYYY-MM-DD` | Tren harian selama 7 hari (`weekStart` s/d `weekStart + 6 hari`) |
 
 **Contoh Bentuk Response `GET /dashboard/today?date=2026-10-18`:**
@@ -715,6 +735,19 @@ Seluruh endpoint yang menerima parameter tanggal atau rentang waktu wajib mematu
   }
 }
 ```
+
+**Definisi Perhitungan Resmi (sumber tunggal untuk backend & mobile):**
+- **`tasks.total`** = jumlah task unik yang `dueAt`-nya berada di interval rentang **ATAU** `completedAt`-nya berada di interval rentang (union, dihitung sekali).
+- **`tasks.completed`** = task di dalam himpunan `total` yang berstatus `DONE` saat query.
+- **`tasks.overdue`** = task di dalam himpunan `total` yang belum `DONE`, memiliki `dueAt`, dan `dueAt < NOW()`.
+- **`tasks.completionRate`** = `round(completed / total * 1000) / 10` (satu desimal); `0` jika `total = 0`.
+- **`habits.totalScheduledInstances`** = total kemunculan hari aktif (`activeDays`, ISO 1–7) dari seluruh habit `isActive = true` pada tanggal kalender `from..to` inklusif.
+- **`habits.totalCompletedInstances`** = jumlah baris `habit_logs` pada rentang tanggal tersebut yang harinya termasuk `activeDays` habit terkait (check-in di hari non-jadwal tidak menaikkan pembilang).
+- **`habits.consistencyRate`** = `round(completed / scheduled * 1000) / 10`; `0` jika `scheduled = 0`.
+- **`weekly.days[].tasksCompleted`** = jumlah task dengan `completedAt` pada hari lokal user (`user.timezone`) tersebut.
+- **`weekly.days[].habitsScheduled`** = jumlah habit aktif yang menjadwalkan `isoWeekday` tersebut.
+- **`weekly.days[].habitsCompleted`** = jumlah check-in pada tanggal tersebut yang sesuai `activeDays`.
+- Semua batas hari menggunakan `DateRangeHelper` dan semantik `[startUtc, endUtc)` (`03-technical-spec.md` §3.3); tidak ada perhitungan zona waktu manual di service lain.
 
 ### Format Error API Standar
 Seluruh exception di NestJS diformat melalui Global Exception Filter yang konsisten:

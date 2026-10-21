@@ -10,6 +10,8 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { HabitsModule } from './habits/habits.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RemindersModule } from './reminders/reminders.module';
+import { StatisticsModule } from './statistics/statistics.module';
 import { TasksModule } from './tasks/tasks.module';
 
 @ApiTags('Health')
@@ -46,6 +48,8 @@ export class HealthController {
     HabitsModule,
     CalendarModule,
     DashboardModule,
+    RemindersModule,
+    StatisticsModule,
   ],
   controllers: [HealthController],
   providers: [
