@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/state/data_revision_provider.dart';
 import '../data/habits_repository.dart';
 import '../domain/habit.dart';
 
@@ -39,6 +40,7 @@ class HabitsController extends AsyncNotifier<HabitsSnapshot> {
       activeDays: activeDays,
     );
     ref.invalidateSelf();
+    _notifyDataChanged();
     return created;
   }
 
@@ -60,6 +62,7 @@ class HabitsController extends AsyncNotifier<HabitsSnapshot> {
     );
     ref.invalidateSelf();
     ref.invalidate(habitLogsProvider(existing.id));
+    _notifyDataChanged();
     return updated;
   }
 
@@ -76,6 +79,7 @@ class HabitsController extends AsyncNotifier<HabitsSnapshot> {
 
     try {
       await _repository.deleteHabit(id);
+      _notifyDataChanged();
     } catch (_) {
       if (previousState != null) {
         state = AsyncData(previousState);
@@ -160,6 +164,7 @@ class HabitsController extends AsyncNotifier<HabitsSnapshot> {
       }
 
       ref.invalidate(habitLogsProvider(habit.id));
+      _notifyDataChanged();
       return response;
     } catch (_) {
       if (previousState != null) {
@@ -167,5 +172,9 @@ class HabitsController extends AsyncNotifier<HabitsSnapshot> {
       }
       rethrow;
     }
+  }
+
+  void _notifyDataChanged() {
+    ref.read(dataRevisionProvider.notifier).markChanged();
   }
 }

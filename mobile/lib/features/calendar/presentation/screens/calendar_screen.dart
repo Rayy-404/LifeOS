@@ -11,7 +11,6 @@ import '../../../../core/widgets/error_state_card.dart';
 import '../../../../core/widgets/lifeos_top_header.dart';
 import '../../../../core/widgets/offline_banner.dart';
 import '../../../../core/widgets/shimmer_skeleton.dart';
-import '../../../dashboard/presentation/dashboard_controller.dart';
 import '../../../tasks/presentation/widgets/task_form_sheet.dart';
 import '../../domain/calendar_event.dart';
 import '../calendar_controller.dart';
@@ -467,7 +466,6 @@ class CalendarScreen extends ConsumerWidget {
                             context,
                             initialDate: selectedDay,
                           );
-                          ref.invalidate(dashboardControllerProvider);
                         },
                       )
                     else
@@ -497,7 +495,6 @@ class CalendarScreen extends ConsumerWidget {
                                   context,
                                   existingEvent: ev,
                                 );
-                                ref.invalidate(dashboardControllerProvider);
                               },
                             ),
                           );
@@ -532,8 +529,6 @@ class CalendarScreen extends ConsumerWidget {
                                   context,
                                   initialTask: task,
                                 );
-                                ref.invalidate(calendarControllerProvider);
-                                ref.invalidate(dashboardControllerProvider);
                               },
                             ),
                           );
@@ -568,7 +563,6 @@ class CalendarScreen extends ConsumerWidget {
                             context,
                             initialDate: selectedDay,
                           );
-                          ref.invalidate(dashboardControllerProvider);
                         },
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,

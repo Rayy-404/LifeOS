@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/state/data_revision_provider.dart';
 import '../../../core/utils/local_date_time_helper.dart';
 import '../../habits/domain/habit.dart';
 import '../../habits/presentation/habits_controller.dart';
@@ -17,6 +18,7 @@ class DashboardController extends AsyncNotifier<DashboardSnapshot> {
 
   @override
   Future<DashboardSnapshot> build() {
+    ref.watch(dataRevisionProvider);
     final todayKey = LocalDateTimeHelper.todayLocalDateKey();
     return _repository.getToday(date: todayKey);
   }
@@ -30,12 +32,10 @@ class DashboardController extends AsyncNotifier<DashboardSnapshot> {
   /// 1-tap task toggle from Dashboard S-04 with optimistic update and cross-feature invalidation.
   Future<void> toggleTaskDone(Task task) async {
     await ref.read(tasksControllerProvider.notifier).toggleTaskDone(task);
-    ref.invalidateSelf();
   }
 
   /// 1-tap habit check-in from Dashboard S-04 with optimistic update and cross-feature invalidation.
   Future<void> toggleHabitCheckIn(Habit habit) async {
     await ref.read(habitsControllerProvider.notifier).toggleTodayCheckIn(habit);
-    ref.invalidateSelf();
   }
 }

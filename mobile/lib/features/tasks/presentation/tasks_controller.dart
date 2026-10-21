@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../core/state/data_revision_provider.dart';
 import '../data/tasks_repository.dart';
 import '../domain/task.dart';
 
@@ -137,6 +138,7 @@ class TasksController extends AsyncNotifier<PaginatedTasks> {
       dueAt: dueAt,
     );
     ref.invalidateSelf();
+    _notifyDataChanged();
     return created;
   }
 
@@ -162,6 +164,7 @@ class TasksController extends AsyncNotifier<PaginatedTasks> {
       reminderIdsToCancelOnDone: existing.reminderIds,
     );
     ref.invalidateSelf();
+    _notifyDataChanged();
     return updated;
   }
 
@@ -196,6 +199,7 @@ class TasksController extends AsyncNotifier<PaginatedTasks> {
         reminderIdsToCancelOnDone: task.reminderIds,
       );
       ref.invalidateSelf();
+      _notifyDataChanged();
     } catch (_) {
       if (previousState != null) {
         state = AsyncData(previousState);
@@ -210,5 +214,10 @@ class TasksController extends AsyncNotifier<PaginatedTasks> {
       reminderIds: task.reminderIds,
     );
     ref.invalidateSelf();
+    _notifyDataChanged();
+  }
+
+  void _notifyDataChanged() {
+    ref.read(dataRevisionProvider.notifier).markChanged();
   }
 }

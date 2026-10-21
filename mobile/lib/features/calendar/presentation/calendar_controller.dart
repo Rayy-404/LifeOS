@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/state/data_revision_provider.dart';
 import '../../../core/utils/local_date_time_helper.dart';
 import '../data/calendar_repository.dart';
 import '../domain/calendar_event.dart';
@@ -76,6 +77,7 @@ class CalendarController extends AsyncNotifier<CalendarAgendaSnapshot> {
 
   @override
   Future<CalendarAgendaSnapshot> build() async {
+    ref.watch(dataRevisionProvider);
     final focused = ref.watch(
       calendarViewProvider.select(
         (s) => DateTime(s.focusedDay.year, s.focusedDay.month, 1),
@@ -115,7 +117,7 @@ class CalendarController extends AsyncNotifier<CalendarAgendaSnapshot> {
       startsAt: startsAt,
       endsAt: endsAt,
     );
-    ref.invalidateSelf();
+    _notifyDataChanged();
     return created;
   }
 
@@ -139,7 +141,7 @@ class CalendarController extends AsyncNotifier<CalendarAgendaSnapshot> {
       startsAt: startsAt,
       endsAt: endsAt,
     );
-    ref.invalidateSelf();
+    _notifyDataChanged();
     return updated;
   }
 
@@ -148,6 +150,10 @@ class CalendarController extends AsyncNotifier<CalendarAgendaSnapshot> {
       event.id,
       reminderIdsToCancel: event.reminderIds,
     );
-    ref.invalidateSelf();
+    _notifyDataChanged();
+  }
+
+  void _notifyDataChanged() {
+    ref.read(dataRevisionProvider.notifier).markChanged();
   }
 }

@@ -6,7 +6,6 @@ import '../../../../app/theme.dart';
 import '../../../../core/errors/api_exception.dart';
 import '../../../../core/widgets/priority_badge.dart';
 import '../../../calendar/presentation/calendar_controller.dart';
-import '../../../dashboard/presentation/dashboard_controller.dart';
 import '../../../habits/presentation/habits_controller.dart';
 import '../../domain/task.dart';
 import '../tasks_controller.dart';
@@ -214,7 +213,6 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
           dueAt: dueAt,
         );
       }
-      ref.invalidate(dashboardControllerProvider);
       if (mounted) {
         Navigator.of(context).pop(true);
       }

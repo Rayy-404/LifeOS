@@ -324,7 +324,6 @@ class DashboardScreen extends ConsumerWidget {
                             iconColor: AppColors.primary,
                             onTap: () async {
                               await TaskFormSheet.show(context);
-                              ref.invalidate(dashboardControllerProvider);
                             },
                           ),
                           _QuickActionButton(
@@ -334,7 +333,6 @@ class DashboardScreen extends ConsumerWidget {
                             iconColor: AppColors.orange,
                             onTap: () async {
                               await EventFormSheet.show(context);
-                              ref.invalidate(dashboardControllerProvider);
                             },
                           ),
                           _QuickActionButton(
@@ -344,7 +342,6 @@ class DashboardScreen extends ConsumerWidget {
                             iconColor: AppColors.success,
                             onTap: () async {
                               await HabitFormSheet.show(context);
-                              ref.invalidate(dashboardControllerProvider);
                             },
                           ),
                           _QuickActionButton(
@@ -389,7 +386,6 @@ class DashboardScreen extends ConsumerWidget {
                           actionLabel: '+ Add Event',
                           onAction: () async {
                             await EventFormSheet.show(context);
-                            ref.invalidate(dashboardControllerProvider);
                           },
                         )
                       else
@@ -435,7 +431,6 @@ class DashboardScreen extends ConsumerWidget {
                           actionLabel: '+ New Habit',
                           onAction: () async {
                             await HabitFormSheet.show(context);
-                            ref.invalidate(dashboardControllerProvider);
                           },
                         )
                       else
@@ -489,7 +484,6 @@ class DashboardScreen extends ConsumerWidget {
                           actionLabel: '+ Add Task',
                           onAction: () async {
                             await TaskFormSheet.show(context);
-                            ref.invalidate(dashboardControllerProvider);
                           },
                         )
                       else
@@ -505,7 +499,6 @@ class DashboardScreen extends ConsumerWidget {
                                   context,
                                   initialTask: task,
                                 );
-                                ref.invalidate(dashboardControllerProvider);
                               },
                             ),
                           ),

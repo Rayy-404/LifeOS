@@ -1,4 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifeos_mobile/core/state/data_revision_provider.dart';
 import 'package:lifeos_mobile/core/utils/local_date_time_helper.dart';
 import 'package:lifeos_mobile/features/calendar/domain/calendar_event.dart';
 import 'package:lifeos_mobile/features/dashboard/domain/dashboard_summary.dart';
@@ -120,4 +122,14 @@ void main() {
       expect(roundTrip.upcomingEvents.first.title, 'Belajar Pemrograman');
     },
   );
+
+  test('dataRevisionProvider increments after a domain mutation signal', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    expect(container.read(dataRevisionProvider), 0);
+    container.read(dataRevisionProvider.notifier).markChanged();
+    container.read(dataRevisionProvider.notifier).markChanged();
+    expect(container.read(dataRevisionProvider), 2);
+  });
 }
