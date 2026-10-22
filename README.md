@@ -14,7 +14,7 @@ Monorepo **LifeOS**: aplikasi Android untuk mengelola **tugas**, **jadwal kegiat
 
 | Tool | Versi |
 | :--- | :--- |
-| Node.js | 20 LTS |
+| Node.js | 24 LTS |
 | npm | 10+ |
 | Flutter | 3.47.7 (stable, Dart 3.13.5) |
 | Docker Desktop | PostgreSQL 17 |

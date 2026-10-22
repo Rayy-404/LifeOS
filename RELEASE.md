@@ -223,7 +223,7 @@ Migrasi Prisma bersifat **forward-only**. Backup database sebelum deploy versi b
 
 ### 3.5 Verifikasi yang sudah dilakukan
 
-- Image multi-stage berhasil dibangun (`node:20-bookworm-slim`, non-root).
+- Image multi-stage berhasil dibangun (`node:24-bookworm-slim`, non-root).
 - Stack produksi terisolasi berhasil start dengan PostgreSQL 17.
 - `prisma migrate deploy` berjalan otomatis di entrypoint.
 - `GET /api/v1/health` → `ok`.
