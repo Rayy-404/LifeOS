@@ -10,7 +10,11 @@ Future<void> main() async {
 
   final sharedPreferences = await SharedPreferences.getInstance();
   final notificationService = LocalNotificationService();
-  await notificationService.initialize();
+  try {
+    await notificationService.initialize();
+  } catch (error) {
+    debugPrint('LocalNotificationService initialization warning: $error');
+  }
 
   runApp(
     ProviderScope(

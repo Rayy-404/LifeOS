@@ -20,8 +20,16 @@ class AuthController extends Notifier<AuthState> {
   /// Called once from the Splash screen: restores or discards the stored session.
   Future<void> loadSession() async {
     final storage = ref.read(secureStorageServiceProvider);
-    final accessToken = await storage.getAccessToken();
-    final refreshToken = await storage.getRefreshToken();
+    String? accessToken;
+    String? refreshToken;
+    try {
+      accessToken = await storage.getAccessToken();
+      refreshToken = await storage.getRefreshToken();
+    } catch (_) {
+      await _clearLocalSession();
+      state = const AuthState.unauthenticated();
+      return;
+    }
 
     if (accessToken == null ||
         accessToken.isEmpty ||
@@ -36,11 +44,13 @@ class AuthController extends Notifier<AuthState> {
       state = AuthState.authenticated(user);
     } on ApiException catch (error) {
       if (error.isNetworkError) {
-        final cachedUser = await _repository.readCachedUser();
-        if (cachedUser != null) {
-          state = AuthState.authenticated(cachedUser);
-          return;
-        }
+        try {
+          final cachedUser = await _repository.readCachedUser();
+          if (cachedUser != null) {
+            state = AuthState.authenticated(cachedUser);
+            return;
+          }
+        } catch (_) {}
       }
       await _clearLocalSession();
       state = const AuthState.unauthenticated();
@@ -86,8 +96,14 @@ class AuthController extends Notifier<AuthState> {
     final cache = ref.read(localCacheServiceProvider);
     final notifications = ref.read(localNotificationServiceProvider);
 
-    await storage.clearTokens();
-    await cache.clearAllCache();
-    await notifications.cancelAll();
+    try {
+      await storage.clearTokens();
+    } catch (_) {}
+    try {
+      await cache.clearAllCache();
+    } catch (_) {}
+    try {
+      await notifications.cancelAll();
+    } catch (_) {}
   }
 }
