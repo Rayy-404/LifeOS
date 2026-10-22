@@ -34,6 +34,9 @@ function resolveCorsOrigins(): string[] {
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
+  // Close Prisma connections cleanly when Docker/Kubernetes sends SIGTERM.
+  app.enableShutdownHooks();
+
   app.setGlobalPrefix('api/v1');
   app.use(helmet());
 

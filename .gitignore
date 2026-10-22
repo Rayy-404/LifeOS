@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+!.env.production.example
 
 # Node / Backend
 node_modules/
@@ -14,8 +15,11 @@ mobile/.dart_tool/
 mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
 mobile/build/
+mobile/dist/
 mobile/.metadata
 mobile/devtools_options.yaml
+mobile/android/key.properties
+mobile/android/app/*.jks
 
 # OS & IDE
 .DS_Store

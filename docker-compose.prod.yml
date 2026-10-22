@@ -1,0 +1,55 @@
+name: lifeos-prod
+
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env.production
+    volumes:
+      - lifeos_prod_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: lifeos-backend:1.0.0
+    restart: unless-stopped
+    init: true
+    env_file:
+      - ./backend/.env.production
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      # Bind ke loopback; taruh reverse proxy (nginx/Caddy) di depan port ini.
+      - "127.0.0.1:${BACKEND_PORT:-3000}:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/v1/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  lifeos_prod_pgdata:
+    name: lifeos_prod_pgdata
