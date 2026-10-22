@@ -113,14 +113,14 @@ sequenceDiagram
    - Menguji *critical user journeys* pada emulator/perangkat Android (API 26+): Register $\rightarrow$ Login $\rightarrow$ Buat Tugas $\rightarrow$ Centang Tugas di Dashboard $\rightarrow$ Buat Habit & Check-in $\rightarrow$ Buat Event Kalender $\rightarrow$ Jadwalkan Reminder Lokal (termasuk interaksi dialog izin notifikasi Android) $\rightarrow$ Logout.
 
 ### 14.2 Matriks Skenario Uji Wajib Sebelum Rilis
-- [ ] **Uji Kepemilikan Target Reminder:** Akun B mencoba membuat/mengubah reminder yang menunjuk ke `taskId`/`eventId` milik Akun A $\rightarrow$ ditolak `404` oleh service dan ditolak composite FK oleh PostgreSQL.
-- [ ] **Uji Validasi `activeDays` Tanpa Duplikat:** Input `[]`, `[0]`, `[8]`, dan `[1, 1, 3]` pada pembuatan/edit habit $\rightarrow$ ditolak `400 VALIDATION_ERROR` di API dan ditolak `CHECK` constraint di DB.
-- [ ] **Uji Konsistensi `currentStreak`:** Habit dengan jadwal Senin–Rabu–Jumat yang selesai pada Senin & Rabu tetap menampilkan `currentStreak = 2` pada hari Kamis (hari non-aktif) dan pada hari Jumat pagi sebelum di-*check-in*.
-- [ ] **Uji Siklus Hidup Reminder & Notifikasi Lokal:** Mengubah `remindAt`, menyelesaikan Task (`DONE`), atau menghapus Task/Event otomatis membatalkan jadwal notifikasi lokal lama di Android; membuka ulang aplikasi merekonsiliasi status `SCHEDULED` $\rightarrow$ `SENT` untuk jadwal yang sudah lewat.
-- [ ] **Uji Batas Tanggal & Zona Waktu `[startUtc, endUtc)`:** Tugas/Event pada pukul `23:59` dan `00:00` waktu lokal (`Asia/Jakarta`) tampil tepat di tanggal lokalnya masing-masing tanpa terhitung ganda.
-- [ ] **Uji Jaringan Terputus:** Matikan jaringan saat berada di Dashboard $\rightarrow$ aplikasi menampilkan data *cache* dan *OfflineBanner* tanpa *crash*.
-- [ ] **Uji Kedaluwarsa & Rotasi Refresh Token:** Saat `accessToken` habis masa berlakunya (15 menit), request berikutnya otomatis memicu `/auth/refresh` satu kali; percobaan memakai ulang refresh token lama mencabut seluruh sesi aktif.
-- [ ] **Uji Penolakan Izin Notifikasi Android 13+:** Tolak izin `POST_NOTIFICATIONS` saat membuat reminder $\rightarrow$ status reminder ditandai `FAILED` dan UI memberi panduan mengaktifkan izin tanpa *unhandled exception*.
+- [x] **Uji Kepemilikan Target Reminder:** Akun B mencoba membuat/mengubah reminder yang menunjuk ke `taskId`/`eventId` milik Akun A $\rightarrow$ ditolak `404` oleh service dan ditolak composite FK oleh PostgreSQL.
+- [x] **Uji Validasi `activeDays` Tanpa Duplikat:** Input `[]`, `[0]`, `[8]`, dan `[1, 1, 3]` pada pembuatan/edit habit $\rightarrow$ ditolak `400 VALIDATION_ERROR` di API dan ditolak `CHECK` constraint di DB.
+- [x] **Uji Konsistensi `currentStreak`:** Habit dengan jadwal Senin–Rabu–Jumat yang selesai pada Senin & Rabu tetap menampilkan `currentStreak = 2` pada hari Kamis (hari non-aktif) dan pada hari Jumat pagi sebelum di-*check-in*.
+- [x] **Uji Siklus Hidup Reminder & Notifikasi Lokal:** Mengubah `remindAt`, menyelesaikan Task (`DONE`), atau menghapus Task/Event otomatis membatalkan jadwal notifikasi lokal lama di Android; membuka ulang aplikasi merekonsiliasi status `SCHEDULED` $\rightarrow$ `SENT` untuk jadwal yang sudah lewat.
+- [x] **Uji Batas Tanggal & Zona Waktu `[startUtc, endUtc)`:** Tugas/Event pada pukul `23:59` dan `00:00` waktu lokal (`Asia/Jakarta`) tampil tepat di tanggal lokalnya masing-masing tanpa terhitung ganda.
+- [x] **Uji Jaringan Terputus:** Matikan jaringan saat berada di Dashboard $\rightarrow$ aplikasi menampilkan data *cache* dan *OfflineBanner* tanpa *crash*.
+- [x] **Uji Kedaluwarsa & Rotasi Refresh Token:** Saat `accessToken` habis masa berlakunya (15 menit), request berikutnya otomatis memicu `/auth/refresh` satu kali; percobaan memakai ulang refresh token lama mencabut seluruh sesi aktif.
+- [x] **Uji Penolakan Izin Notifikasi Android 13+:** Tolak izin `POST_NOTIFICATIONS` saat membuat reminder $\rightarrow$ status reminder ditandai `FAILED` dan UI memberi panduan mengaktifkan izin tanpa *unhandled exception*.
 
 ---
 

@@ -925,16 +925,16 @@ npm run start:dev
 ## 7. Kriteria Penerimaan MVP
 
 Sebelum dianggap selesai, LifeOS wajib memenuhi seluruh kriteria berikut:
-- [ ] Pengguna bisa mendaftar, login, refresh sesi secara otomatis, dan logout.
-- [ ] Pengguna bisa membuat, mengubah, menyelesaikan, memfilter, mencari, dan menghapus tugas.
-- [ ] Pengguna bisa membuat kebiasaan, melakukan *check-in* harian idempotent, dan melihat riwayat serta *streak*.
-- [ ] Kalender menampilkan kegiatan (`CalendarEvent`) dan tugas (`Task`) sesuai tanggal serta zona waktu pengguna.
-- [ ] Reminder dapat dibuat, diubah, dibatalkan, dan dijadwalkan sebagai notifikasi lokal pada Android.
-- [ ] Dashboard dan statistik mencerminkan data database yang sebenarnya secara akurat.
-- [ ] Pengguna tidak dapat membaca atau mengubah data milik akun lain (isolasi penuh per `userId`).
-- [ ] Penanganan *error*, *loading shimmer*, *empty state*, dan koneksi gagal tersedia di Flutter.
-- [ ] Migration database dapat dijalankan ulang (`prisma migrate deploy` / `migrate reset`) pada lingkungan baru tanpa error.
-- [ ] Pengujian unit dan integrasi mencakup logika penting serta kontrol akses.
+- [x] Pengguna bisa mendaftar, login, refresh sesi secara otomatis, dan logout.
+- [x] Pengguna bisa membuat, mengubah, menyelesaikan, memfilter, mencari, dan menghapus tugas.
+- [x] Pengguna bisa membuat kebiasaan, melakukan *check-in* harian idempotent, dan melihat riwayat serta *streak*.
+- [x] Kalender menampilkan kegiatan (`CalendarEvent`) dan tugas (`Task`) sesuai tanggal serta zona waktu pengguna.
+- [x] Reminder dapat dibuat, diubah, dibatalkan, dan dijadwalkan sebagai notifikasi lokal pada Android.
+- [x] Dashboard dan statistik mencerminkan data database yang sebenarnya secara akurat.
+- [x] Pengguna tidak dapat membaca atau mengubah data milik akun lain (isolasi penuh per `userId`).
+- [x] Penanganan *error*, *loading shimmer*, *empty state*, dan koneksi gagal tersedia di Flutter.
+- [x] Migration database dapat dijalankan ulang (`prisma migrate deploy` / `migrate reset`) pada lingkungan baru tanpa error.
+- [x] Pengujian unit dan integrasi mencakup logika penting serta kontrol akses.
 
 ---
 

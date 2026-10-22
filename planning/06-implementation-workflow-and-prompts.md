@@ -443,14 +443,14 @@ Lanjutkan proyek LifeOS dari kondisi repo saat ini.
 
 ## 8. Checklist Release Gate MVP (dari `03` §7 & `04` §14.2)
 
-- [ ] Register, login, refresh otomatis, logout berjalan end-to-end
-- [ ] CRUD tugas + filter + search + lifecycle `completedAt`
-- [ ] Habit: activeDays, check-in idempotent, streak, riwayat
-- [ ] Kalender menampilkan event + task sesuai tanggal & zona waktu user
-- [ ] Reminder: buat/ubah/batal + notifikasi lokal Android + rekonsiliasi reboot
-- [ ] Dashboard & statistik = data database sebenarnya
-- [ ] Zero cross-user data leakage (uji 404/403)
-- [ ] Loading shimmer, empty, error, offline state tersedia di Flutter
-- [ ] `prisma migrate deploy` / `migrate reset` reproducible di lingkungan baru
-- [ ] Unit + integration test mencakup logika penting & kontrol akses
-- [ ] P95 `GET /dashboard/today` & `GET /tasks` < 200ms (lokal/staging)
+- [x] Register, login, refresh otomatis, logout berjalan end-to-end
+- [x] CRUD tugas + filter + search + lifecycle `completedAt`
+- [x] Habit: activeDays, check-in idempotent, streak, riwayat
+- [x] Kalender menampilkan event + task sesuai tanggal & zona waktu user
+- [x] Reminder: buat/ubah/batal + notifikasi lokal Android + rekonsiliasi reboot
+- [x] Dashboard & statistik = data database sebenarnya
+- [x] Zero cross-user data leakage (uji 404/403)
+- [x] Loading shimmer, empty, error, offline state tersedia di Flutter
+- [x] `prisma migrate deploy` / `migrate reset` reproducible di lingkungan baru
+- [x] Unit + integration test mencakup logika penting & kontrol akses
+- [x] P95 `GET /dashboard/today` & `GET /tasks` < 200ms (lokal/staging)
