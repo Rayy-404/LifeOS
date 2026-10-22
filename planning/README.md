@@ -15,10 +15,11 @@ Seluruh dokumen di dalam folder `planning/` ini menjadi acuan tunggal (*Single S
 | **03** | [`03-technical-spec.md`](file:///C:/Users/Rey/Documents/Projects/lifeOS/planning/03-technical-spec.md) | **Spesifikasi Teknis MVP (Bagian 1–8):** Ruang lingkup teknis, kontrak desain, skema lengkap `backend/prisma/schema.prisma` (Prisma 6 + PostgreSQL 17) beserta SQL `CHECK` constraints, kontrak REST API `/api/v1`, struktur monorepo `lifeos/`, konfigurasi Docker & `.env`, kriteria penerimaan MVP, dan urutan implementasi. |
 | **04** | [`04-architecture-security-testing.md`](file:///C:/Users/Rey/Documents/Projects/lifeOS/planning/04-architecture-security-testing.md) | **Integritas Data, Keamanan & Pengujian (Bagian 11–15):** Kompatibilitas kontrak API, strategi *online-first* dengan *local read cache*, sinkronisasi siklus hidup *Reminder* & notifikasi lokal Android, standar keamanan (Argon2, JWT rotation, Zero IDOR), strategi pengujian berlapis, dan matriks kesiapan rilis. |
 | **05** | [`05-engineering-playbooks.md`](file:///C:/Users/Rey/Documents/Projects/lifeOS/planning/05-engineering-playbooks.md) | **Engineering & AI Operational Playbooks:** 6 protokol operasional siap pakai untuk *Pre-Launch Security Audit*, *Structured Bug Triage*, *E2E Testing Setup*, *Two-Phase Codebase Cleanup*, *Atomic Conventional Git Commits*, dan *Reusable Skill Generator*. |
+| **06** | [`06-implementation-workflow-and-prompts.md`](file:///C:/Users/Rey/Documents/Projects/lifeOS/planning/06-implementation-workflow-and-prompts.md) | **Alur Implementasi & Prompt:** peta dokumen, status repo, roadmap 7 fase + gate verifikasi, prompt siap tempel per fase, checklist Release Gate MVP, dan status Milestone R. |
 
 ---
 
-## Ringkasan Roadmap Implementasi (6 Fase)
+## Ringkasan Roadmap Implementasi (7 Fase + Release)
 
 ```mermaid
 flowchart LR
@@ -27,6 +28,8 @@ flowchart LR
     P3 --> P4["4. Habit Tracker\n(ActiveDays, Idempotent\nCheck-in, Streak)"]
     P4 --> P5["5. Dashboard & Kalender\n(Agregasi Harian &\nAgenda Terpadu)"]
     P5 --> P6["6. Reminder & Statistik\n(Android Local Notif,\nWeekly Trend, E2E Test)"]
+    P6 --> P7["7. Hardening &\nRelease Gate MVP"]
+    P7 --> R["🚀 Milestone R\nRelease MVP"]
 ```
 
 ---

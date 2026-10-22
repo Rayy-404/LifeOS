@@ -6,6 +6,7 @@ Monorepo **LifeOS**: aplikasi Android untuk mengelola **tugas**, **jadwal kegiat
 - `mobile/` — Klien Android (Flutter · Material 3 · Riverpod · GoRouter · Dio · flutter_local_notifications)
 - `planning/` — Dokumen produk & teknik (PRD, design brief, kontrak API, keamanan & pengujian, playbooks)
 - `design/` — Referensi visual (screenshot & export desain)
+- `RELEASE.md` — Runbook signing APK, build produksi, dan deploy Docker (Milestone R)
 
 ---
 
@@ -15,7 +16,7 @@ Monorepo **LifeOS**: aplikasi Android untuk mengelola **tugas**, **jadwal kegiat
 | :--- | :--- |
 | Node.js | 20 LTS |
 | npm | 10+ |
-| Flutter | 3.35 (stable) |
+| Flutter | 3.47.7 (stable, Dart 3.13.5) |
 | Docker Desktop | PostgreSQL 17 |
 
 ---
@@ -118,6 +119,8 @@ Fixture pendukung: `backend/test/support/` (auth helper, seeding, cleanup per pr
 2. **Mobile** — `flutter analyze` + `flutter test`.
 3. **Mobile integration** — emulator Android (API 33) dengan backend yang dijalankan di runner + `adb reverse` + `flutter test integration_test`.
 
+Workflow memakai `JWT_ACCESS_SECRET` (bukan `JWT_SECRET`) dan Flutter **3.47.7** agar cocok dengan constraint Dart 3.13.5.
+
 > Repo ini belum memiliki git remote; file workflow sudah siap tetapi baru berjalan setelah repository terhubung ke GitHub.
 
 ---
@@ -145,3 +148,27 @@ Skenario berikut **tidak** bisa dibuktikan andal tanpa perangkat/emulator nyata 
 5. **Perangkat fisik via IP LAN** (butuh penyesuaian `network_security_config.xml`).
 
 Item 1–3 dapat dijalankan di emulator melalui `mobile/integration_test/app_journey_test.dart`.
+
+---
+
+## 7. Release (Milestone R)
+
+Panduan lengkap ada di [`RELEASE.md`](RELEASE.md). Ringkasan:
+
+```powershell
+# APK distribusi (wajib URL HTTPS)
+cd mobile
+powershell -ExecutionPolicy Bypass -File .\build-release.ps1 `
+  -ApiBaseUrl "https://api.lifeos.id/api/v1"
+
+# Backend produksi
+Copy-Item backend/.env.production.example backend/.env.production
+# isi secret, lalu:
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Status saat ini:
+
+- ✅ Release signing (keystore lokal, ignored), APK smoke v2+v3, Dockerfile multi-stage, `docker-compose.prod.yml`, entrypoint migrasi, CI env/versi Flutter.
+- ✅ Sudah diverifikasi: image Docker menyala, health check, register/login/tasks, Swagger 404 di production, container non-root.
+- ⬜ Belum: build ulang dengan domain HTTPS produksi, deploy server + TLS, backup keystore, uji notifikasi di perangkat fisik.

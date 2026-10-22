@@ -454,3 +454,21 @@ Lanjutkan proyek LifeOS dari kondisi repo saat ini.
 - [x] `prisma migrate deploy` / `migrate reset` reproducible di lingkungan baru
 - [x] Unit + integration test mencakup logika penting & kontrol akses
 - [x] P95 `GET /dashboard/today` & `GET /tasks` < 200ms (lokal/staging)
+
+---
+
+## 9. Status Milestone R — Release MVP (22 Oktober 2026)
+
+Fase 7 selesai; pekerjaan berlanjut ke packaging rilis. Runbook lengkap ada di [`RELEASE.md`](../RELEASE.md).
+
+- [x] Release signing Android (keystore lokal 4096-bit, `key.properties` ignored)
+- [x] APK release universal dibangun, signature v2 + v3 terverifikasi
+- [x] Script build rilis `mobile/build-release.ps1` (HTTPS wajib, smoke mode emulator)
+- [x] `backend/Dockerfile` multi-stage + entrypoint `prisma migrate deploy`
+- [x] `docker-compose.prod.yml` (PostgreSQL 17, health check, non-root, port loopback)
+- [x] Smoke test container: health, register/login, tasks, Swagger 404 di production
+- [x] CI memakai `JWT_ACCESS_SECRET` dan Flutter 3.47.7
+- [ ] Build ulang APK/AAB dengan domain HTTPS produksi
+- [ ] Deploy backend + reverse proxy TLS
+- [ ] Uji notifikasi lokal & reboot di perangkat fisik
+- [ ] Publikasi AAB ke Play Store (opsional)
