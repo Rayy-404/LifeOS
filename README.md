@@ -1,3 +1,12 @@
+---
+title: LifeOS Backend
+emoji: 🚀
+colorFrom: indigo
+colorTo: purple
+sdk: docker
+app_port: 7860
+---
+
 # LifeOS — Personal Productivity & Academic OS
 
 Monorepo **LifeOS**: aplikasi Android untuk mengelola **tugas**, **jadwal kegiatan**, **kebiasaan**, **pengingat (local notification)**, dan **statistik** dalam satu dashboard yang dihitung langsung dari database.
