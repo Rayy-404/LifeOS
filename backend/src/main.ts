@@ -13,7 +13,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
  * website. Now an explicit allowlist is required and production fails fast
  * when `CORS_ORIGIN` is missing.
  */
-function resolveCorsOrigins(): string[] {
+function resolveCorsOrigins(): (string | RegExp)[] {
   const raw = process.env.CORS_ORIGIN?.trim();
   if (!raw) {
     if (process.env.NODE_ENV === 'production') {
@@ -22,7 +22,12 @@ function resolveCorsOrigins(): string[] {
           'allowed origin (comma separated) in production.',
       );
     }
-    return ['http://localhost:3000', 'http://localhost:8080'];
+    return [
+      'http://localhost:3000',
+      'http://localhost:8080',
+      /^http:\/\/localhost:\d+$/,
+      /^http:\/\/127\.0\.0\.1:\d+$/,
+    ];
   }
 
   return raw
