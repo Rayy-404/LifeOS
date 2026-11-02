@@ -32,6 +32,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://lifeos:dev-only-password@localhost:5432/lifeos?schema=public
+      DATABASE_URL_UNPOOLED: postgresql://lifeos:dev-only-password@localhost:5432/lifeos?schema=public
       JWT_ACCESS_SECRET: ci-only-secret-not-used-in-production-0123456789
       CORS_ORIGIN: http://localhost:3000
       NODE_ENV: test
@@ -116,6 +117,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://lifeos:dev-only-password@localhost:5432/lifeos?schema=public
+      DATABASE_URL_UNPOOLED: postgresql://lifeos:dev-only-password@localhost:5432/lifeos?schema=public
       JWT_ACCESS_SECRET: ci-only-secret-not-used-in-production-0123456789
       CORS_ORIGIN: http://localhost:3000
 
