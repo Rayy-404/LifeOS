@@ -104,7 +104,7 @@ class _ProfileStatisticsScreenState
     final scheduledReminderCount = reminders?.scheduledCount ?? 0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [

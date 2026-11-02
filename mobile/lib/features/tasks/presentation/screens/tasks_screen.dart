@@ -81,7 +81,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final progressRatio = totalCount > 0 ? completedCount / totalCount : 0.0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +115,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFE1DFFF),
+                              color: AppColors.primarySoft,
                               borderRadius:
                                   BorderRadius.circular(AppRadius.pill),
                             ),
@@ -124,7 +124,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                               style: textTheme.labelSmall?.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF413EDC),
+                                color: AppColors.primaryDark,
                               ),
                             ),
                           ),

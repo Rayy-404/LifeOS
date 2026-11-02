@@ -80,7 +80,7 @@ class DashboardScreen extends ConsumerWidget {
     final localDateLabel = DateFormat('EEEE, d MMM yyyy').format(DateTime.now());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [

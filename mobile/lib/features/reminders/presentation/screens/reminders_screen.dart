@@ -156,7 +156,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
         : allItems.where((item) => item.status == _filter).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [

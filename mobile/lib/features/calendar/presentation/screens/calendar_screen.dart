@@ -60,7 +60,7 @@ class CalendarScreen extends ConsumerWidget {
         selectedDay.subtract(Duration(days: selectedDay.weekday - 1));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -170,7 +170,7 @@ class CalendarScreen extends ConsumerWidget {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0x99E1DFFF),
+                                    color: AppColors.primarySoft,
                                     borderRadius:
                                         BorderRadius.circular(AppRadius.pill),
                                   ),
@@ -179,7 +179,7 @@ class CalendarScreen extends ConsumerWidget {
                                     style: textTheme.labelSmall?.copyWith(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF413EDC),
+                                      color: AppColors.primaryDark,
                                     ),
                                   ),
                                 ),
@@ -437,7 +437,7 @@ class CalendarScreen extends ConsumerWidget {
                           style: textTheme.labelSmall?.copyWith(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF413EDC),
+                            color: AppColors.primary,
                           ),
                         ),
                       ],

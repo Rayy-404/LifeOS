@@ -23,7 +23,7 @@ class OnboardingScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
@@ -194,9 +194,9 @@ class _StitchHeroIllustration extends StatelessWidget {
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      const Color(0xFFF8F9FF),
-                      const Color(0xFFF8F9FF).withValues(alpha: 0.7),
-                      const Color(0xFFF8F9FF).withValues(alpha: 0.0),
+                      AppColors.background,
+                      AppColors.background.withValues(alpha: 0.7),
+                      AppColors.background.withValues(alpha: 0.0),
                     ],
                   ),
                 ),

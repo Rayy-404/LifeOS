@@ -57,7 +57,7 @@ class HabitsScreen extends ConsumerWidget {
     final isFromCache = snapshot?.isFromCache ?? false;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -182,7 +182,7 @@ class HabitsScreen extends ConsumerWidget {
                                   style: textTheme.labelSmall?.copyWith(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF595C7E),
+                                    color: AppColors.textSecondary,
                                   ),
                                 ),
                               ),

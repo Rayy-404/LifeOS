@@ -56,6 +56,114 @@ abstract final class AppRadius {
   static const double pill = 999.0;
 }
 
+/// Elevation & Shadow tokens (`DESIGN.md` Section 4).
+abstract final class AppShadows {
+  /// Soft card shadow: 0 4px 16px rgba(91, 91, 246, 0.06)
+  static const List<BoxShadow> card = [
+    BoxShadow(
+      color: Color(0x0F5B5BF6),
+      blurRadius: 16,
+      offset: Offset(0, 4),
+    ),
+  ];
+
+  /// Center FAB shadow: 0 6px 16px rgba(91, 91, 246, 0.35)
+  static const List<BoxShadow> fab = [
+    BoxShadow(
+      color: Color(0x595B5BF6),
+      blurRadius: 16,
+      offset: Offset(0, 6),
+    ),
+  ];
+
+  /// Hero navy banner shadow
+  static const List<BoxShadow> hero = [
+    BoxShadow(
+      color: Color(0x2E1E2140),
+      blurRadius: 24,
+      offset: Offset(0, 8),
+    ),
+  ];
+
+  /// Elevated pill / active chip shadow
+  static const List<BoxShadow> activeChip = [
+    BoxShadow(
+      color: Color(0x405B5BF6),
+      blurRadius: 12,
+      offset: Offset(0, 4),
+    ),
+  ];
+}
+
+/// Typography tokens (`DESIGN.md` Section 3).
+/// Font Family: Plus Jakarta Sans for everything.
+abstract final class AppTypography {
+  /// display.hero: 32 / 38, Weight 800
+  static TextStyle get displayHero => GoogleFonts.plusJakartaSans(
+        fontSize: 32,
+        height: 38 / 32,
+        fontWeight: FontWeight.w800,
+        color: AppColors.textPrimary,
+      );
+
+  /// display.metric: 28 / 34, Weight 700
+  static TextStyle get displayMetric => GoogleFonts.plusJakartaSans(
+        fontSize: 28,
+        height: 34 / 28,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
+      );
+
+  /// headline.screen: 22 / 28, Weight 700
+  static TextStyle get headlineScreen => GoogleFonts.plusJakartaSans(
+        fontSize: 22,
+        height: 28 / 22,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
+      );
+
+  /// title.section: 16 / 22, Weight 700
+  static TextStyle get titleSection => GoogleFonts.plusJakartaSans(
+        fontSize: 16,
+        height: 22 / 16,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
+      );
+
+  /// title.card: 14 / 20, Weight 600
+  static TextStyle get titleCard => GoogleFonts.plusJakartaSans(
+        fontSize: 14,
+        height: 20 / 14,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      );
+
+  /// body: 13 / 18, Weight 400
+  static TextStyle get body => GoogleFonts.plusJakartaSans(
+        fontSize: 13,
+        height: 18 / 13,
+        fontWeight: FontWeight.w400,
+        color: AppColors.textPrimary,
+      );
+
+  /// label: 12 / 16, Weight 600
+  static TextStyle get label => GoogleFonts.plusJakartaSans(
+        fontSize: 12,
+        height: 16 / 12,
+        fontWeight: FontWeight.w600,
+        color: AppColors.primary,
+      );
+
+  /// caption: 11 / 14, Weight 500
+  static TextStyle get caption => GoogleFonts.plusJakartaSans(
+        fontSize: 11,
+        height: 14 / 11,
+        fontWeight: FontWeight.w500,
+        color: AppColors.textSecondary,
+      );
+}
+
+
 abstract final class AppTheme {
   static ThemeData get light {
     final baseTextTheme = GoogleFonts.plusJakartaSansTextTheme();
