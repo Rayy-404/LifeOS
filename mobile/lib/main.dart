@@ -8,6 +8,10 @@ import 'core/storage/local_cache_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Tune image cache for 2GB RAM & entry-level devices to prevent OOM.
+  PaintingBinding.instance.imageCache.maximumSize = 50;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 20 << 20; // 20 MB
+
   final sharedPreferences = await SharedPreferences.getInstance();
   final notificationService = LocalNotificationService();
   try {

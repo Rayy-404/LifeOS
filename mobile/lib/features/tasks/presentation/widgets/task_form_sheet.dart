@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -62,7 +64,6 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
   DateTime? _dueDate;
   TimeOfDay? _dueTime;
   String? _titleError;
-  String? _reminderNotice;
   bool _isSubmitting = false;
 
   bool get _isEditing => widget.initialTask != null;
@@ -156,6 +157,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
   }
 
   Future<void> _submit() async {
+    if (_isSubmitting) return;
     FocusScope.of(context).unfocus();
     final title = _titleController.text.trim();
     if (title.isEmpty) {
@@ -169,100 +171,129 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
 
     setState(() {
       _titleError = null;
-      _reminderNotice = null;
       _isSubmitting = true;
     });
+    HapticFeedback.lightImpact();
 
     final description = _descriptionController.text.trim();
     final dueAt = _composeDueAt();
-    final notifier = ref.read(tasksControllerProvider.notifier);
+    final tasksNotifier = ref.read(tasksControllerProvider.notifier);
+    final habitsNotifier = ref.read(habitsControllerProvider.notifier);
+    final calendarNotifier = ref.read(calendarControllerProvider.notifier);
+    final remindersNotifier = ref.read(remindersControllerProvider.notifier);
+    final messenger = ScaffoldMessenger.of(context);
+    final isEditing = _isEditing;
+    final initialTask = widget.initialTask;
+    final segment = _segment;
+    final status = _status;
+    final priority = _priority;
+    final remindMe = _remindMe;
 
-    try {
-      if (_isEditing) {
-        final saved = await notifier.updateTask(
-          widget.initialTask!,
-          title: title,
-          description: description.isEmpty ? null : description,
-          includeNullDescription: description.isEmpty,
-          status: _status,
-          priority: _priority,
-          dueAt: dueAt,
-          includeNullDueAt: dueAt == null,
-        );
-        await _syncTaskReminderSafely(saved);
-      } else if (_segment == _QuickAddSegment.habit) {
-        await ref.read(habitsControllerProvider.notifier).createHabit(
-              name: title.length > 120 ? title.substring(0, 120) : title,
-              description: description.isEmpty ? null : description,
-            );
-      } else if (_segment == _QuickAddSegment.event) {
-        final start = dueAt ?? DateTime.now().add(const Duration(hours: 1));
-        final end = start.add(const Duration(hours: 1));
-        final savedEvent =
-            await ref.read(calendarControllerProvider.notifier).createEvent(
-                  title: title,
-                  description: description.isEmpty ? null : description,
-                  startsAt: start,
-                  endsAt: end,
-                );
-        await _syncEventReminderSafely(savedEvent);
-      } else {
-        final saved = await notifier.createTask(
-          title: title,
-          description: description.isEmpty ? null : description,
-          priority: _priority,
-          dueAt: dueAt,
-        );
-        await _syncTaskReminderSafely(saved);
-      }
-      if (mounted) {
-        final notice = _reminderNotice;
-        final messenger = ScaffoldMessenger.of(context);
-        Navigator.of(context).pop(true);
-        if (notice != null) {
-          messenger.showSnackBar(
-            SnackBar(content: Text(notice), duration: const Duration(seconds: 4)),
+    // Trigger optimistic controller mutation synchronously (inserts/updates local
+    // state immediately before the first network await) and close modal in < 50ms.
+    Future<void> backgroundWork() async {
+      try {
+        String? reminderNotice;
+        if (isEditing && initialTask != null) {
+          final saved = await tasksNotifier.updateTask(
+            initialTask,
+            title: title,
+            description: description.isEmpty ? null : description,
+            includeNullDescription: description.isEmpty,
+            status: status,
+            priority: priority,
+            dueAt: dueAt,
+            includeNullDueAt: dueAt == null,
+          );
+          reminderNotice = await _syncTaskReminderSafely(
+            remindersNotifier,
+            saved,
+            remindMe: remindMe,
+          );
+        } else if (segment == _QuickAddSegment.habit) {
+          await habitsNotifier.createHabit(
+            name: title.length > 120 ? title.substring(0, 120) : title,
+            description: description.isEmpty ? null : description,
+          );
+        } else if (segment == _QuickAddSegment.event) {
+          final start = dueAt ?? DateTime.now().add(const Duration(hours: 1));
+          final end = start.add(const Duration(hours: 1));
+          final savedEvent = await calendarNotifier.createEvent(
+            title: title,
+            description: description.isEmpty ? null : description,
+            startsAt: start,
+            endsAt: end,
+          );
+          reminderNotice = await _syncEventReminderSafely(
+            remindersNotifier,
+            savedEvent,
+            remindMe: remindMe,
+          );
+        } else {
+          final saved = await tasksNotifier.createTask(
+            title: title,
+            description: description.isEmpty ? null : description,
+            priority: priority,
+            dueAt: dueAt,
+          );
+          reminderNotice = await _syncTaskReminderSafely(
+            remindersNotifier,
+            saved,
+            remindMe: remindMe,
           );
         }
-      }
-    } on ApiException catch (error) {
-      if (!mounted) return;
-      final titleErr = error.details['title']?.firstOrNull;
-      if (titleErr != null) {
-        setState(() => _titleError = titleErr);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.message)),
+
+        if (reminderNotice != null) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(reminderNotice),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      } on ApiException catch (error) {
+        messenger.showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text('Gagal menyimpan: ${error.message}'),
+          ),
+        );
+      } catch (_) {
+        messenger.showSnackBar(
+          const SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text('Gagal menyimpan item. Periksa koneksi Anda.'),
+          ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
+    }
+
+    unawaited(backgroundWork());
+    if (mounted) {
+      Navigator.of(context).pop(true);
     }
   }
 
   /// Keeps the reminder in sync after a task is created/updated without
   /// failing the already-persisted task (`03-technical-spec.md` §3.2).
-  Future<void> _syncTaskReminderSafely(Task saved) async {
-    final controller = ref.read(remindersControllerProvider.notifier);
+  static Future<String?> _syncTaskReminderSafely(
+    RemindersController controller,
+    Task saved, {
+    required bool remindMe,
+  }) async {
     final dueAt = saved.dueAt;
 
     try {
-      if (!_remindMe ||
-          dueAt == null ||
-          saved.status == TaskStatus.done) {
+      if (!remindMe || dueAt == null || saved.status == TaskStatus.done) {
         await controller.cancelScheduledForTarget(taskId: saved.id);
-        return;
+        return null;
       }
 
       final remindAt = dueAt.subtract(const Duration(minutes: 15));
       if (!remindAt.isAfter(DateTime.now())) {
         await controller.cancelScheduledForTarget(taskId: saved.id);
-        _reminderNotice =
-            'Task disimpan. Pengingat tidak dijadwalkan karena waktunya '
+        return 'Task disimpan. Pengingat tidak dijadwalkan karena waktunya '
             'kurang dari 15 menit lagi.';
-        return;
       }
 
       final result = await controller.upsertForTask(
@@ -271,33 +302,34 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         remindAt: remindAt,
       );
       if (result != null && !result.permissionGranted) {
-        _reminderNotice =
-            'Task disimpan, tetapi izin notifikasi nonaktif. Aktifkan di '
+        return 'Task disimpan, tetapi izin notifikasi nonaktif. Aktifkan di '
             'Pengaturan Android → Apps → LifeOS → Notifications.';
       }
+      return null;
     } on ApiException catch (error) {
-      _reminderNotice = 'Task disimpan, tetapi pengingat gagal: '
-          '${error.message}';
+      return 'Task disimpan, tetapi pengingat gagal: ${error.message}';
+    } catch (_) {
+      return null;
     }
   }
 
   /// Event-mode variant of `_syncTaskReminderSafely` for Quick Add → Event.
-  Future<void> _syncEventReminderSafely(CalendarEvent saved) async {
-    final controller = ref.read(remindersControllerProvider.notifier);
-
+  static Future<String?> _syncEventReminderSafely(
+    RemindersController controller,
+    CalendarEvent saved, {
+    required bool remindMe,
+  }) async {
     try {
-      if (!_remindMe) {
+      if (!remindMe) {
         await controller.cancelScheduledForTarget(eventId: saved.id);
-        return;
+        return null;
       }
 
       final remindAt = saved.startsAt.subtract(const Duration(minutes: 15));
       if (!remindAt.isAfter(DateTime.now())) {
         await controller.cancelScheduledForTarget(eventId: saved.id);
-        _reminderNotice =
-            'Event disimpan. Pengingat tidak dijadwalkan karena waktunya '
+        return 'Event disimpan. Pengingat tidak dijadwalkan karena waktunya '
             'kurang dari 15 menit lagi.';
-        return;
       }
 
       final result = await controller.upsertForEvent(
@@ -306,35 +338,42 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         remindAt: remindAt,
       );
       if (result != null && !result.permissionGranted) {
-        _reminderNotice =
-            'Event disimpan, tetapi izin notifikasi nonaktif. Aktifkan di '
+        return 'Event disimpan, tetapi izin notifikasi nonaktif. Aktifkan di '
             'Pengaturan Android → Apps → LifeOS → Notifications.';
       }
+      return null;
     } on ApiException catch (error) {
-      _reminderNotice = 'Event disimpan, tetapi pengingat gagal: '
-          '${error.message}';
+      return 'Event disimpan, tetapi pengingat gagal: ${error.message}';
+    } catch (_) {
+      return null;
     }
   }
 
   Future<void> _delete() async {
     final task = widget.initialTask;
-    if (task == null) return;
+    if (task == null || _isSubmitting) return;
 
     setState(() => _isSubmitting = true);
-    try {
-      await ref.read(tasksControllerProvider.notifier).deleteTask(task);
-      if (mounted) {
-        Navigator.of(context).pop(true);
-      }
-    } on ApiException catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message)),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
+    HapticFeedback.mediumImpact();
+    final tasksNotifier = ref.read(tasksControllerProvider.notifier);
+    final messenger = ScaffoldMessenger.of(context);
+
+    unawaited(
+      tasksNotifier.deleteTask(task).catchError((Object error) {
+        final msg = error is ApiException
+            ? error.message
+            : 'Gagal menghapus tugas. Coba lagi.';
+        messenger.showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text(msg),
+          ),
+        );
+      }),
+    );
+
+    if (mounted) {
+      Navigator.of(context).pop(true);
     }
   }
 
@@ -462,7 +501,11 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     child: TextField(
                       key: const ValueKey('task_form_title'),
                       controller: _titleController,
-                      onChanged: (_) => setState(() {}),
+                      onChanged: (_) {
+                        if (_titleError != null) {
+                          setState(() => _titleError = null);
+                        }
+                      },
                       textInputAction: TextInputAction.next,
                       style: textTheme.titleSmall?.copyWith(
                         fontSize: 14,
@@ -479,18 +522,20 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                       ),
                     ),
                   ),
-                  if (_titleController.text.isNotEmpty)
-                    GestureDetector(
-                      onTap: () {
-                        _titleController.clear();
-                        setState(() {});
-                      },
-                      child: const Icon(
-                        LucideIcons.circleX,
-                        size: 18,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _titleController,
+                    builder: (context, value, _) {
+                      if (value.text.isEmpty) return const SizedBox.shrink();
+                      return GestureDetector(
+                        onTap: _titleController.clear,
+                        child: const Icon(
+                          LucideIcons.circleX,
+                          size: 18,
+                          color: AppColors.textSecondary,
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -691,9 +736,9 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: const [
                   BoxShadow(
-                    color: Color(0x595B5BF6),
-                    blurRadius: 20,
-                    offset: Offset(0, 6),
+                    color: Color(0x405B5BF6),
+                    blurRadius: 12,
+                    offset: Offset(0, 4),
                   ),
                 ],
               ),
@@ -709,29 +754,20 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                   ),
                 ),
                 onPressed: _isSubmitting ? null : _submit,
-                child: _isSubmitting
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.4,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(LucideIcons.check, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            _isEditing ? 'Update Task' : 'Save Task',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(LucideIcons.check, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      _isEditing ? 'Update Task' : 'Save Task',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                       ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -748,10 +784,14 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     final selected = _segment == segment;
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => _segment = segment),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          setState(() => _segment = segment);
+        },
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
+          curve: Curves.easeOutCubic,
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: selected ? AppColors.primary : Colors.transparent,

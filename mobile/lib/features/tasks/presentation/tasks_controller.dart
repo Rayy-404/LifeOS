@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../core/state/data_revision_provider.dart';
+import '../../dashboard/presentation/dashboard_controller.dart';
 import '../data/tasks_repository.dart';
 import '../domain/task.dart';
 
@@ -121,27 +122,92 @@ class TasksController extends AsyncNotifier<PaginatedTasks> {
 
   Future<void> refresh() async {
     final filter = ref.read(tasksFilterProvider);
-    state = const AsyncLoading();
+    if (state.value == null) {
+      state = const AsyncLoading();
+    }
     state = await AsyncValue.guard(() => _fetchForFilter(filter));
   }
 
+  /// Optimistically inserts a temporary task into UI state immediately (< 50ms)
+  /// and reconciles with the real server task in the background.
   Future<Task> createTask({
     required String title,
     String? description,
     TaskPriority priority = TaskPriority.medium,
     DateTime? dueAt,
   }) async {
-    final created = await _repository.createTask(
+    final now = DateTime.now().toUtc();
+    final tempId = 'temp_${now.microsecondsSinceEpoch}';
+    final tempTask = Task(
+      id: tempId,
       title: title,
       description: description,
+      status: TaskStatus.todo,
       priority: priority,
-      dueAt: dueAt,
+      dueAt: dueAt?.toUtc(),
+      createdAt: now,
+      updatedAt: now,
     );
-    ref.invalidateSelf();
-    _notifyDataChanged();
-    return created;
+
+    final previousState = state.value;
+    if (previousState != null) {
+      state = AsyncData(
+        PaginatedTasks(
+          items: [tempTask, ...previousState.items],
+          meta: PaginationMeta(
+            page: previousState.meta.page,
+            limit: previousState.meta.limit,
+            totalItems: previousState.meta.totalItems + 1,
+            totalPages: previousState.meta.totalPages == 0
+                ? 1
+                : previousState.meta.totalPages,
+          ),
+          isFromCache: previousState.isFromCache,
+        ),
+      );
+    }
+    ref
+        .read(dashboardControllerProvider.notifier)
+        .optimisticInsertTask(tempTask);
+
+    try {
+      final created = await _repository.createTask(
+        title: title,
+        description: description,
+        priority: priority,
+        dueAt: dueAt,
+      );
+
+      final current = state.value;
+      if (current != null) {
+        final reconciled = current.items
+            .map((t) => t.id == tempId ? created : t)
+            .toList(growable: false);
+        state = AsyncData(
+          PaginatedTasks(
+            items: reconciled,
+            meta: current.meta,
+            isFromCache: current.isFromCache,
+          ),
+        );
+      }
+      ref
+          .read(dashboardControllerProvider.notifier)
+          .optimisticReplaceTask(tempId, created);
+      _notifyDataChanged();
+      return created;
+    } catch (_) {
+      if (previousState != null) {
+        state = AsyncData(previousState);
+      }
+      ref
+          .read(dashboardControllerProvider.notifier)
+          .optimisticRemoveTask(tempId);
+      rethrow;
+    }
   }
 
+  /// Optimistically updates the task in local state before syncing with the server.
   Future<Task> updateTask(
     Task existing, {
     String? title,
@@ -152,36 +218,89 @@ class TasksController extends AsyncNotifier<PaginatedTasks> {
     DateTime? dueAt,
     bool includeNullDueAt = false,
   }) async {
-    final updated = await _repository.updateTask(
-      existing.id,
-      title: title,
+    final previousState = state.value;
+    final optimisticTask = existing.copyWith(
+      title: title ?? existing.title,
       description: description,
-      includeNullDescription: includeNullDescription,
-      status: status,
-      priority: priority,
-      dueAt: dueAt,
-      includeNullDueAt: includeNullDueAt,
-      reminderIdsToCancelOnDone: existing.reminderIds,
+      clearDescription: includeNullDescription,
+      status: status ?? existing.status,
+      priority: priority ?? existing.priority,
+      dueAt: dueAt?.toUtc(),
+      clearDueAt: includeNullDueAt,
+      updatedAt: DateTime.now().toUtc(),
     );
-    ref.invalidateSelf();
-    _notifyDataChanged();
-    return updated;
+
+    if (previousState != null) {
+      state = AsyncData(
+        PaginatedTasks(
+          items: previousState.items
+              .map((t) => t.id == existing.id ? optimisticTask : t)
+              .toList(growable: false),
+          meta: previousState.meta,
+          isFromCache: previousState.isFromCache,
+        ),
+      );
+    }
+    ref
+        .read(dashboardControllerProvider.notifier)
+        .optimisticReplaceTask(existing.id, optimisticTask);
+
+    try {
+      final updated = await _repository.updateTask(
+        existing.id,
+        title: title,
+        description: description,
+        includeNullDescription: includeNullDescription,
+        status: status,
+        priority: priority,
+        dueAt: dueAt,
+        includeNullDueAt: includeNullDueAt,
+        reminderIdsToCancelOnDone: existing.reminderIds,
+      );
+
+      final current = state.value;
+      if (current != null) {
+        state = AsyncData(
+          PaginatedTasks(
+            items: current.items
+                .map((t) => t.id == existing.id ? updated : t)
+                .toList(growable: false),
+            meta: current.meta,
+            isFromCache: current.isFromCache,
+          ),
+        );
+      }
+      ref
+          .read(dashboardControllerProvider.notifier)
+          .optimisticReplaceTask(existing.id, updated);
+      _notifyDataChanged();
+      return updated;
+    } catch (_) {
+      if (previousState != null) {
+        state = AsyncData(previousState);
+      }
+      ref
+          .read(dashboardControllerProvider.notifier)
+          .optimisticReplaceTask(existing.id, existing);
+      rethrow;
+    }
   }
 
   /// Optimistically toggles task status between `DONE` and `TODO` (`02-design-brief.md` Section 5).
   Future<void> toggleTaskDone(Task task) async {
     final nextStatus = task.isDone ? TaskStatus.todo : TaskStatus.done;
     final previousState = state.value;
+    final optimisticTask = task.copyWith(
+      status: nextStatus,
+      completedAt: nextStatus == TaskStatus.done ? DateTime.now() : null,
+      clearCompletedAt: nextStatus != TaskStatus.done,
+    );
 
     if (previousState != null) {
       final optimisticItems = previousState.items.map((item) {
         if (item.id != task.id) return item;
-        return item.copyWith(
-          status: nextStatus,
-          completedAt: nextStatus == TaskStatus.done ? DateTime.now() : null,
-          clearCompletedAt: nextStatus != TaskStatus.done,
-        );
-      }).toList();
+        return optimisticTask;
+      }).toList(growable: false);
 
       state = AsyncData(
         PaginatedTasks(
@@ -191,30 +310,83 @@ class TasksController extends AsyncNotifier<PaginatedTasks> {
         ),
       );
     }
+    ref
+        .read(dashboardControllerProvider.notifier)
+        .optimisticReplaceTask(task.id, optimisticTask);
 
     try {
-      await _repository.updateTask(
+      final updated = await _repository.updateTask(
         task.id,
         status: nextStatus,
         reminderIdsToCancelOnDone: task.reminderIds,
       );
-      ref.invalidateSelf();
+
+      final current = state.value;
+      if (current != null) {
+        state = AsyncData(
+          PaginatedTasks(
+            items: current.items
+                .map((item) => item.id == task.id ? updated : item)
+                .toList(growable: false),
+            meta: current.meta,
+            isFromCache: current.isFromCache,
+          ),
+        );
+      }
+      ref
+          .read(dashboardControllerProvider.notifier)
+          .optimisticReplaceTask(task.id, updated);
       _notifyDataChanged();
     } catch (_) {
       if (previousState != null) {
         state = AsyncData(previousState);
       }
+      ref
+          .read(dashboardControllerProvider.notifier)
+          .optimisticReplaceTask(task.id, task);
       rethrow;
     }
   }
 
+  /// Optimistically removes the task immediately before deleting on the backend.
   Future<void> deleteTask(Task task) async {
-    await _repository.deleteTask(
-      task.id,
-      reminderIds: task.reminderIds,
-    );
-    ref.invalidateSelf();
-    _notifyDataChanged();
+    final previousState = state.value;
+    if (previousState != null) {
+      state = AsyncData(
+        PaginatedTasks(
+          items: previousState.items
+              .where((t) => t.id != task.id)
+              .toList(growable: false),
+          meta: PaginationMeta(
+            page: previousState.meta.page,
+            limit: previousState.meta.limit,
+            totalItems:
+                (previousState.meta.totalItems - 1).clamp(0, 999999),
+            totalPages: previousState.meta.totalPages,
+          ),
+          isFromCache: previousState.isFromCache,
+        ),
+      );
+    }
+    ref
+        .read(dashboardControllerProvider.notifier)
+        .optimisticRemoveTask(task.id);
+
+    try {
+      await _repository.deleteTask(
+        task.id,
+        reminderIds: task.reminderIds,
+      );
+      _notifyDataChanged();
+    } catch (_) {
+      if (previousState != null) {
+        state = AsyncData(previousState);
+      }
+      ref
+          .read(dashboardControllerProvider.notifier)
+          .optimisticInsertTask(task);
+      rethrow;
+    }
   }
 
   void _notifyDataChanged() {

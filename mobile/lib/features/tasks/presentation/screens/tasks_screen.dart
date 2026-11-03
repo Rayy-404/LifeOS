@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -74,7 +75,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final tasksAsync = ref.watch(tasksControllerProvider);
     final textTheme = Theme.of(context).textTheme;
 
-    final items = tasksAsync.value?.items ?? const <Task>[];
+    final paginatedData = tasksAsync.value;
+    final items = paginatedData?.items ?? const <Task>[];
     final totalCount = items.length;
     final completedCount = items.where((t) => t.isDone).length;
     final pendingCount = totalCount - completedCount;
@@ -109,22 +111,26 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primarySoft,
-                              borderRadius:
-                                  BorderRadius.circular(AppRadius.pill),
-                            ),
-                            child: Text(
-                              '$pendingCount Left',
-                              style: textTheme.labelSmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.primaryDark,
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 180),
+                            child: Container(
+                              key: ValueKey<int>(pendingCount),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primarySoft,
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.pill),
+                              ),
+                              child: Text(
+                                '$pendingCount Left',
+                                style: textTheme.labelSmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primaryDark,
+                                ),
                               ),
                             ),
                           ),
@@ -223,9 +229,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: const [
                             BoxShadow(
-                              color: Color(0x0F5B5BF6),
-                              blurRadius: 16,
-                              offset: Offset(0, 4),
+                              color: Color(0x0D5B5BF6),
+                              blurRadius: 10,
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
@@ -297,11 +303,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
                         return InkWell(
                           borderRadius: BorderRadius.circular(AppRadius.pill),
-                          onTap: () => ref
-                              .read(tasksFilterProvider.notifier)
-                              .setTab(tab),
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            ref.read(tasksFilterProvider.notifier).setTab(tab);
+                          },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 160),
+                            curve: Curves.easeOutCubic,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 6,
@@ -316,14 +324,14 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                                   ? const [
                                       BoxShadow(
                                         color: Color(0x405B5BF6),
-                                        blurRadius: 12,
-                                        offset: Offset(0, 4),
+                                        blurRadius: 10,
+                                        offset: Offset(0, 3),
                                       ),
                                     ]
                                   : const [
                                       BoxShadow(
                                         color: Color(0x0A5B5BF6),
-                                        blurRadius: 8,
+                                        blurRadius: 6,
                                         offset: Offset(0, 2),
                                       ),
                                     ],
@@ -393,19 +401,25 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: tasksAsync.when(
-                  loading: () => const TaskListShimmer(),
-                  error: (error, _) {
-                    final message = error is ApiException
-                        ? error.message
-                        : 'Tidak dapat memuat daftar tugas.';
-                    return ErrorStateCard(
-                      message: message,
-                      onRetry: () =>
-                          ref.read(tasksControllerProvider.notifier).refresh(),
-                    );
-                  },
-                  data: (paginated) {
+                child: Builder(
+                  builder: (context) {
+                    if (tasksAsync.isLoading && paginatedData == null) {
+                      return const TaskListShimmer();
+                    }
+                    if (tasksAsync.hasError && paginatedData == null) {
+                      final error = tasksAsync.error;
+                      final message = error is ApiException
+                          ? error.message
+                          : 'Tidak dapat memuat daftar tugas.';
+                      return ErrorStateCard(
+                        message: message,
+                        onRetry: () => ref
+                            .read(tasksControllerProvider.notifier)
+                            .refresh(),
+                      );
+                    }
+
+                    final paginated = paginatedData!;
                     if (paginated.items.isEmpty) {
                       return AppEmptyState(
                         icon: LucideIcons.circleCheck,
@@ -486,89 +500,98 @@ class _TodaysMomentumCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final percent = (progressRatio * 100).round();
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            Color(0x66D5D7FF),
-            Colors.white,
-            Colors.white,
+    return RepaintBoundary(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              Color(0x66D5D7FF),
+              Colors.white,
+              Colors.white,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0D5B5BF6),
+              blurRadius: 10,
+              offset: Offset(0, 3),
+            ),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D5B5BF6),
-            blurRadius: 16,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 44,
-            height: 44,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(
-                    value: progressRatio,
-                    strokeWidth: 3.5,
-                    backgroundColor: AppColors.surfaceMuted,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppColors.primary,
+        child: Row(
+          children: [
+            SizedBox(
+              width: 44,
+              height: 44,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween<double>(begin: 0.0, end: progressRatio),
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOutCubic,
+                      builder: (context, animatedValue, _) {
+                        return CircularProgressIndicator(
+                          value: animatedValue,
+                          strokeWidth: 3.5,
+                          backgroundColor: AppColors.surfaceMuted,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.primary,
+                          ),
+                          strokeCap: StrokeCap.round,
+                        );
+                      },
                     ),
-                    strokeCap: StrokeCap.round,
                   ),
-                ),
-                Text(
-                  '$percent%',
-                  style: textTheme.labelSmall?.copyWith(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                  Text(
+                    '$percent%',
+                    style: textTheme.labelSmall?.copyWith(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Today's Momentum",
-                  style: textTheme.titleSmall?.copyWith(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Today's Momentum",
+                    style: textTheme.titleSmall?.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 1),
-                Text(
-                  '$completedCount of $totalCount coursework items checked off',
-                  style: textTheme.labelSmall?.copyWith(
-                    fontSize: 11,
-                    color: AppColors.textSecondary,
+                  const SizedBox(height: 1),
+                  Text(
+                    '$completedCount of $totalCount coursework items checked off',
+                    style: textTheme.labelSmall?.copyWith(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const Icon(
-            LucideIcons.trendingUp,
-            size: 20,
-            color: AppColors.textSecondary,
-          ),
-        ],
+            const Icon(
+              LucideIcons.trendingUp,
+              size: 20,
+              color: AppColors.textSecondary,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -589,8 +612,8 @@ class _ProTipBanner extends StatelessWidget {
         boxShadow: const [
           BoxShadow(
             color: Color(0x0A5B5BF6),
-            blurRadius: 16,
-            offset: Offset(0, 4),
+            blurRadius: 10,
+            offset: Offset(0, 3),
           ),
         ],
       ),

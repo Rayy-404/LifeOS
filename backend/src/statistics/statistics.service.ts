@@ -79,29 +79,28 @@ export class StatisticsService {
     const fromDate = this.toDateOnlyDate(from);
     const toDate = this.toDateOnlyDate(to);
 
-    const [tasks, habits] = await Promise.all([
-      this.prisma.task.findMany({
-        where: {
-          userId: user.id,
-          OR: [
-            { dueAt: { gte: startUtc, lt: endUtc } },
-            { completedAt: { gte: startUtc, lt: endUtc } },
-          ],
+    const tasks = await this.prisma.task.findMany({
+      where: {
+        userId: user.id,
+        OR: [
+          { dueAt: { gte: startUtc, lt: endUtc } },
+          { completedAt: { gte: startUtc, lt: endUtc } },
+        ],
+      },
+      select: TASK_SELECT,
+    });
+
+    const habits = await this.prisma.habit.findMany({
+      where: { userId: user.id, isActive: true },
+      select: {
+        id: true,
+        activeDays: true,
+        logs: {
+          where: { logDate: { gte: fromDate, lte: toDate } },
+          select: { logDate: true },
         },
-        select: TASK_SELECT,
-      }),
-      this.prisma.habit.findMany({
-        where: { userId: user.id, isActive: true },
-        select: {
-          id: true,
-          activeDays: true,
-          logs: {
-            where: { logDate: { gte: fromDate, lte: toDate } },
-            select: { logDate: true },
-          },
-        },
-      }),
-    ]);
+      },
+    });
 
     const total = tasks.length;
     const completed = tasks.filter(
@@ -164,26 +163,25 @@ export class StatisticsService {
     const fromDate = this.toDateOnlyDate(weekStart);
     const toDate = this.toDateOnlyDate(weekEnd);
 
-    const [completedTasks, habits] = await Promise.all([
-      this.prisma.task.findMany({
-        where: {
-          userId: user.id,
-          completedAt: { gte: startUtc, lt: endUtc },
+    const completedTasks = await this.prisma.task.findMany({
+      where: {
+        userId: user.id,
+        completedAt: { gte: startUtc, lt: endUtc },
+      },
+      select: { completedAt: true },
+    });
+
+    const habits = await this.prisma.habit.findMany({
+      where: { userId: user.id, isActive: true },
+      select: {
+        id: true,
+        activeDays: true,
+        logs: {
+          where: { logDate: { gte: fromDate, lte: toDate } },
+          select: { logDate: true },
         },
-        select: { completedAt: true },
-      }),
-      this.prisma.habit.findMany({
-        where: { userId: user.id, isActive: true },
-        select: {
-          id: true,
-          activeDays: true,
-          logs: {
-            where: { logDate: { gte: fromDate, lte: toDate } },
-            select: { logDate: true },
-          },
-        },
-      }),
-    ]);
+      },
+    });
 
     const tasksCompletedByDate = new Map<string, number>();
     for (const task of completedTasks) {

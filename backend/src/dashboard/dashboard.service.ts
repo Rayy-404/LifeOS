@@ -58,32 +58,30 @@ export class DashboardService {
     );
     const isoWeekday = DateRangeHelper.getIsoWeekday(targetDate);
 
-    const [allUserTasks, upcomingEvents, activeHabits] = await Promise.all([
-      this.prisma.task.findMany({
-        where: { userId: user.id },
-        include: REMINDER_SUMMARY_INCLUDE,
-      }),
-      this.prisma.calendarEvent.findMany({
-        where: {
-          userId: user.id,
-          startsAt: { lt: endUtc },
-          endsAt: { gt: startUtc },
+    const allUserTasks = await this.prisma.task.findMany({
+      where: { userId: user.id },
+      include: REMINDER_SUMMARY_INCLUDE,
+    });
+    const upcomingEvents = await this.prisma.calendarEvent.findMany({
+      where: {
+        userId: user.id,
+        startsAt: { lt: endUtc },
+        endsAt: { gt: startUtc },
+      },
+      orderBy: { startsAt: 'asc' },
+    });
+    const activeHabits = await this.prisma.habit.findMany({
+      where: {
+        userId: user.id,
+        isActive: true,
+      },
+      include: {
+        logs: {
+          orderBy: { logDate: 'desc' },
         },
-        orderBy: { startsAt: 'asc' },
-      }),
-      this.prisma.habit.findMany({
-        where: {
-          userId: user.id,
-          isActive: true,
-        },
-        include: {
-          logs: {
-            orderBy: { logDate: 'desc' },
-          },
-        },
-        orderBy: { createdAt: 'asc' },
-      }),
-    ]);
+      },
+      orderBy: { createdAt: 'asc' },
+    });
 
     const overdueCutoff = targetDate === todayLocal ? now : startUtc;
 

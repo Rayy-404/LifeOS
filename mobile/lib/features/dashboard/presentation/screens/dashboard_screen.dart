@@ -60,6 +60,33 @@ class DashboardScreen extends ConsumerWidget {
     }
   }
 
+  void _openHabitDetail(BuildContext context, Habit habit) {
+    Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        transitionDuration: const Duration(milliseconds: 220),
+        reverseTransitionDuration: const Duration(milliseconds: 180),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            HabitDetailScreen(initialHabit: habit),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final curved = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          );
+          return FadeTransition(
+            opacity: curved,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0.04, 0),
+                end: Offset.zero,
+              ).animate(curved),
+              child: child,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
@@ -160,105 +187,121 @@ class DashboardScreen extends ConsumerWidget {
                       )
                     else ...[
                       // Daily Progress Hero Card
-                      InkWell(
-                        borderRadius: BorderRadius.circular(20),
-                        onTap: () => context.go(AppRoutes.tasks),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x0F5B5BF6),
-                                blurRadius: 16,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: 64,
-                                height: 64,
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    SizedBox(
-                                      width: 56,
-                                      height: 56,
-                                      child: CircularProgressIndicator(
-                                        value: progressRatio,
-                                        strokeWidth: 5.5,
-                                        backgroundColor: AppColors.primarySoft,
-                                        valueColor:
-                                            const AlwaysStoppedAnimation<Color>(
-                                          AppColors.primary,
-                                        ),
-                                        strokeCap: StrokeCap.round,
-                                      ),
-                                    ),
-                                    Text(
-                                      '$progressPercent%',
-                                      style: textTheme.titleMedium?.copyWith(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                  ],
+                      RepaintBoundary(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: () => context.go(AppRoutes.tasks),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x0D5B5BF6),
+                                  blurRadius: 10,
+                                  offset: Offset(0, 3),
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '$completedTasks of $totalTasks tasks done',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style:
-                                                textTheme.titleSmall?.copyWith(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.textPrimary,
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 64,
+                                  height: 64,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: 56,
+                                        height: 56,
+                                        child: TweenAnimationBuilder<double>(
+                                          tween: Tween<double>(
+                                            begin: 0.0,
+                                            end: progressRatio,
+                                          ),
+                                          duration:
+                                              const Duration(milliseconds: 220),
+                                          curve: Curves.easeOutCubic,
+                                          builder: (context, animatedRatio, _) {
+                                            return CircularProgressIndicator(
+                                              value: animatedRatio,
+                                              strokeWidth: 5.5,
+                                              backgroundColor:
+                                                  AppColors.primarySoft,
+                                              valueColor:
+                                                  const AlwaysStoppedAnimation<
+                                                      Color>(
+                                                AppColors.primary,
+                                              ),
+                                              strokeCap: StrokeCap.round,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      Text(
+                                        '$progressPercent%',
+                                        style: textTheme.titleMedium?.copyWith(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              '$completedTasks of $totalTasks tasks done',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: textTheme.titleSmall
+                                                  ?.copyWith(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.textPrimary,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Container(
-                                          width: 6,
-                                          height: 6,
-                                          decoration: const BoxDecoration(
-                                            color: AppColors.success,
-                                            shape: BoxShape.circle,
+                                          const SizedBox(width: 6),
+                                          Container(
+                                            width: 6,
+                                            height: 6,
+                                            decoration: const BoxDecoration(
+                                              color: AppColors.success,
+                                              shape: BoxShape.circle,
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      habitsScheduled > 0
-                                          ? 'Habits today: $habitsCompleted/$habitsScheduled completed'
-                                          : "Keep going! You're doing great!",
-                                      style: textTheme.bodyMedium?.copyWith(
-                                        fontSize: 13,
-                                        color: AppColors.textSecondary,
+                                        ],
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        habitsScheduled > 0
+                                            ? 'Habits today: $habitsCompleted/$habitsScheduled completed'
+                                            : "Keep going! You're doing great!",
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          fontSize: 13,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              const Icon(
-                                LucideIcons.chevronRight,
-                                size: 20,
-                                color: AppColors.textSecondary,
-                              ),
-                            ],
+                                const Icon(
+                                  LucideIcons.chevronRight,
+                                  size: 20,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -349,8 +392,7 @@ class DashboardScreen extends ConsumerWidget {
                             label: 'Statistics',
                             bgColor: AppColors.pinkPastel,
                             iconColor: AppColors.pink,
-                            onTap: () =>
-                                context.push(AppRoutes.statistics),
+                            onTap: () => context.push(AppRoutes.statistics),
                           ),
                         ],
                       ),
@@ -439,16 +481,12 @@ class DashboardScreen extends ConsumerWidget {
                           (habit) => Padding(
                             padding: const EdgeInsets.only(bottom: 10),
                             child: HabitCard(
+                              key: ValueKey('dash_habit_${habit.id}'),
                               habit: habit,
                               variant: HabitCardVariant.dashboardCompact,
                               onToggleCheckIn: () =>
                                   _handleToggleHabit(context, ref, habit),
-                              onTap: () => Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) =>
-                                      HabitDetailScreen(initialHabit: habit),
-                                ),
-                              ),
+                              onTap: () => _openHabitDetail(context, habit),
                             ),
                           ),
                         ),
@@ -492,6 +530,7 @@ class DashboardScreen extends ConsumerWidget {
                           (task) => Padding(
                             padding: const EdgeInsets.only(bottom: 10),
                             child: TaskCard(
+                              key: ValueKey('dash_task_${task.id}'),
                               task: task,
                               onToggleDone: () =>
                                   _handleToggleTask(context, ref, task),
@@ -529,112 +568,114 @@ class _DashboardAgendaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0F5B5BF6),
-              blurRadius: 16,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: IntrinsicHeight(
-          child: Row(
-            children: [
-              Container(
-                width: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.violet,
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
+    return RepaintBoundary(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0D5B5BF6),
+                blurRadius: 10,
+                offset: Offset(0, 3),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.violetPastel,
-                            borderRadius: BorderRadius.circular(
-                              AppRadius.pill,
-                            ),
-                          ),
-                          child: Text(
-                            event.formattedTimeRange,
-                            style: textTheme.labelSmall?.copyWith(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Event',
-                          style: textTheme.labelSmall?.copyWith(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      event.title,
-                      style: textTheme.titleSmall?.copyWith(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    if (event.location != null &&
-                        event.location!.trim().isNotEmpty) ...[
-                      const SizedBox(height: 3),
+            ],
+          ),
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                Container(
+                  width: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.violet,
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Row(
                         children: [
-                          const Icon(
-                            LucideIcons.mapPin,
-                            size: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              event.location!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: textTheme.bodyMedium?.copyWith(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.violetPastel,
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.pill,
                               ),
+                            ),
+                            child: Text(
+                              event.formattedTimeRange,
+                              style: textTheme.labelSmall?.copyWith(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Event',
+                            style: textTheme.labelSmall?.copyWith(
+                              fontSize: 11,
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        event.title,
+                        style: textTheme.titleSmall?.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      if (event.location != null &&
+                          event.location!.trim().isNotEmpty) ...[
+                        const SizedBox(height: 3),
+                        Row(
+                          children: [
+                            const Icon(
+                              LucideIcons.mapPin,
+                              size: 14,
+                              color: AppColors.textSecondary,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                event.location!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textTheme.bodyMedium?.copyWith(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              const Icon(
-                LucideIcons.chevronRight,
-                size: 20,
-                color: AppColors.textSecondary,
-              ),
-            ],
+                const Icon(
+                  LucideIcons.chevronRight,
+                  size: 20,
+                  color: AppColors.textSecondary,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -705,66 +746,69 @@ class _StatTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F5B5BF6),
-            blurRadius: 16,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: iconBg,
-                  shape: BoxShape.circle,
+    return RepaintBoundary(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0D5B5BF6),
+              blurRadius: 10,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: iconBg,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 18, color: iconColor),
                 ),
-                child: Icon(icon, size: 18, color: iconColor),
-              ),
-              Icon(
-                LucideIcons.ellipsis,
-                size: 18,
-                color: AppColors.textSecondary.withValues(alpha: 0.45),
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: textTheme.displaySmall?.copyWith(
-                  fontSize: 26,
-                  height: 1.1,
-                  fontWeight: FontWeight.w700,
-                  color:
-                      highlightDanger ? AppColors.error : AppColors.textPrimary,
+                Icon(
+                  LucideIcons.ellipsis,
+                  size: 18,
+                  color: AppColors.textSecondary.withValues(alpha: 0.45),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: textTheme.labelMedium?.copyWith(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: textTheme.displaySmall?.copyWith(
+                    fontSize: 26,
+                    height: 1.1,
+                    fontWeight: FontWeight.w700,
+                    color: highlightDanger
+                        ? AppColors.error
+                        : AppColors.textPrimary,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: textTheme.labelMedium?.copyWith(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -787,30 +831,33 @@ class _QuickActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(18),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Column(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Icon(icon, size: 24, color: iconColor),
             ),
-            child: Icon(icon, size: 24, color: iconColor),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
-                ),
-          ),
-        ],
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -32,8 +32,10 @@ class DashboardRepository {
     return guardApiCallWithCacheFallback<DashboardSnapshot>(
       action: () async {
         final response = await _remoteDataSource.getToday(date: date);
-        final data =
-            (response['data'] as Map<String, dynamic>?) ?? const {};
+        final rawData = response['data'];
+        final data = rawData is Map
+            ? Map<String, dynamic>.from(rawData)
+            : const <String, dynamic>{};
         final snapshot = DashboardSnapshot.fromJson(data);
 
         await _cache.writeJson(_cacheKey, snapshot.toJson());

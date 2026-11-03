@@ -75,28 +75,27 @@ export class CalendarService {
       user.timezone,
     );
 
-    const [events, tasks] = await Promise.all([
-      this.prisma.calendarEvent.findMany({
-        where: {
-          userId: user.id,
-          startsAt: { lt: endUtc },
-          endsAt: { gt: startUtc },
+    const events = await this.prisma.calendarEvent.findMany({
+      where: {
+        userId: user.id,
+        startsAt: { lt: endUtc },
+        endsAt: { gt: startUtc },
+      },
+      include: REMINDER_SUMMARY_INCLUDE,
+      orderBy: { startsAt: 'asc' },
+    });
+
+    const tasks = await this.prisma.task.findMany({
+      where: {
+        userId: user.id,
+        dueAt: {
+          gte: startUtc,
+          lt: endUtc,
         },
-        include: REMINDER_SUMMARY_INCLUDE,
-        orderBy: { startsAt: 'asc' },
-      }),
-      this.prisma.task.findMany({
-        where: {
-          userId: user.id,
-          dueAt: {
-            gte: startUtc,
-            lt: endUtc,
-          },
-        },
-        include: REMINDER_SUMMARY_INCLUDE,
-        orderBy: { dueAt: 'asc' },
-      }),
-    ]);
+      },
+      include: REMINDER_SUMMARY_INCLUDE,
+      orderBy: { dueAt: 'asc' },
+    });
 
     return {
       from,

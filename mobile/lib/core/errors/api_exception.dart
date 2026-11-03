@@ -19,8 +19,9 @@ class ApiException extends Equatable implements Exception {
     final response = error.response;
     final data = response?.data;
 
-    if (data is Map<String, dynamic>) {
-      final rawDetails = data['details'];
+    if (data is Map) {
+      final mapData = Map<String, dynamic>.from(data);
+      final rawDetails = mapData['details'];
       final parsedDetails = <String, List<String>>{};
       if (rawDetails is Map) {
         rawDetails.forEach((key, value) {
@@ -33,9 +34,9 @@ class ApiException extends Equatable implements Exception {
       }
 
       return ApiException(
-        statusCode: (data['statusCode'] as int?) ?? response?.statusCode ?? 500,
-        code: (data['code'] as String?) ?? 'UNKNOWN_API_ERROR',
-        message: (data['message'] as String?) ?? 'Terjadi kesalahan pada server.',
+        statusCode: (mapData['statusCode'] as int?) ?? response?.statusCode ?? 500,
+        code: (mapData['code'] as String?) ?? 'UNKNOWN_API_ERROR',
+        message: (mapData['message'] as String?) ?? 'Terjadi kesalahan pada server.',
         details: parsedDetails,
       );
     }

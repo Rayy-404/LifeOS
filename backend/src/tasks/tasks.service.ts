@@ -94,20 +94,18 @@ export class TasksService {
       ];
     }
 
-    const [items, totalItems] = await Promise.all([
-      this.prisma.task.findMany({
-        where,
-        skip,
-        take: limit,
-        include: REMINDER_SUMMARY_INCLUDE,
-        orderBy: [
-          { dueAt: { sort: 'asc', nulls: 'last' } },
-          { priority: 'desc' },
-          { createdAt: 'desc' },
-        ],
-      }),
-      this.prisma.task.count({ where }),
-    ]);
+    const items = await this.prisma.task.findMany({
+      where,
+      skip,
+      take: limit,
+      include: REMINDER_SUMMARY_INCLUDE,
+      orderBy: [
+        { dueAt: { sort: 'asc', nulls: 'last' } },
+        { priority: 'desc' },
+        { createdAt: 'desc' },
+      ],
+    });
+    const totalItems = await this.prisma.task.count({ where });
 
     const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / limit);
 

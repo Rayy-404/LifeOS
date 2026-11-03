@@ -61,10 +61,12 @@ class AuthInterceptor extends QueuedInterceptor {
     RequestInterceptorHandler handler,
   ) async {
     if (!_isPublicAuthEndpoint(options.path)) {
-      final accessToken = await _secureStorage.getAccessToken();
-      if (accessToken != null && accessToken.isNotEmpty) {
-        options.headers['Authorization'] = 'Bearer $accessToken';
-      }
+      try {
+        final accessToken = await _secureStorage.getAccessToken();
+        if (accessToken != null && accessToken.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $accessToken';
+        }
+      } catch (_) {}
     }
     handler.next(options);
   }
@@ -80,6 +82,21 @@ class AuthInterceptor extends QueuedInterceptor {
     if (statusCode == 401 &&
         !_isPublicAuthEndpoint(requestOptions.path) &&
         requestOptions.extra['retried'] != true) {
+      final currentAccessToken = await _secureStorage.getAccessToken();
+      final requestAuthHeader =
+          requestOptions.headers['Authorization'] as String?;
+      if (currentAccessToken != null &&
+          currentAccessToken.isNotEmpty &&
+          requestAuthHeader != 'Bearer $currentAccessToken') {
+        try {
+          requestOptions.headers['Authorization'] =
+              'Bearer $currentAccessToken';
+          requestOptions.extra['retried'] = true;
+          final retryResponse = await _dio.fetch<dynamic>(requestOptions);
+          return handler.resolve(retryResponse);
+        } catch (_) {}
+      }
+
       final refreshToken = await _secureStorage.getRefreshToken();
       if (refreshToken != null && refreshToken.isNotEmpty) {
         try {
@@ -98,7 +115,9 @@ class AuthInterceptor extends QueuedInterceptor {
             data: {'refreshToken': refreshToken},
           );
 
-          final data = response.data?['data'] as Map<String, dynamic>?;
+          final rawData = response.data?['data'];
+          final data =
+              rawData is Map ? Map<String, dynamic>.from(rawData) : null;
           final newAccessToken = data?['accessToken'] as String?;
           final newRefreshToken = data?['refreshToken'] as String?;
 

@@ -27,24 +27,28 @@ class LocalCacheService {
   static const String _prefix = 'lifeos_cache_';
 
   Future<void> writeJson(String key, Map<String, dynamic> data) async {
-    await _storage.writeValue('$_prefix$key', jsonEncode(data));
+    try {
+      await _storage.writeValue('$_prefix$key', jsonEncode(data));
+    } catch (_) {}
   }
 
   Future<Map<String, dynamic>?> readJson(String key) async {
-    final raw = await _storage.readValue('$_prefix$key');
-    if (raw == null || raw.isEmpty) return null;
     try {
+      final raw = await _storage.readValue('$_prefix$key');
+      if (raw == null || raw.isEmpty) return null;
       final decoded = jsonDecode(raw);
-      return decoded is Map<String, dynamic> ? decoded : null;
+      return decoded is Map ? Map<String, dynamic>.from(decoded) : null;
     } catch (_) {
       return null;
     }
   }
 
   Future<void> clearAllCache() async {
-    final entries = await _storage.readAll();
-    for (final key in entries.keys.where((k) => k.startsWith(_prefix))) {
-      await _storage.deleteValue(key);
-    }
+    try {
+      final entries = await _storage.readAll();
+      for (final key in entries.keys.where((k) => k.startsWith(_prefix))) {
+        await _storage.deleteValue(key);
+      }
+    } catch (_) {}
   }
 }

@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -51,7 +53,6 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
   bool _remindMe = true;
-  String? _reminderNotice;
   bool _isSaving = false;
   String? _errorMessage;
 
@@ -132,6 +133,7 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
   }
 
   Future<void> _submit() async {
+    if (_isSaving) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final startsAt = _composeDateTime(_startTime);
@@ -147,83 +149,126 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
     setState(() {
       _isSaving = true;
       _errorMessage = null;
-      _reminderNotice = null;
     });
+    HapticFeedback.lightImpact();
 
     final title = _titleController.text.trim();
     final location = _locationController.text.trim();
     final desc = _descriptionController.text.trim();
     final controller = ref.read(calendarControllerProvider.notifier);
+    final reminders = ref.read(remindersControllerProvider.notifier);
+    final messenger = ScaffoldMessenger.of(context);
+    final isEditing = _isEditing;
+    final existing = widget.existingEvent;
+    final remindMe = _remindMe;
 
-    try {
-      CalendarEvent saved;
-      if (_isEditing) {
-        saved = await controller.updateEvent(
-          widget.existingEvent!,
-          title: title,
-          location: location.isEmpty ? null : location,
-          includeNullLocation: location.isEmpty,
-          description: desc.isEmpty ? null : desc,
-          includeNullDescription: desc.isEmpty,
-          startsAt: startsAt,
-          endsAt: endsAt,
+    final now = DateTime.now();
+    final optimisticEvent = isEditing && existing != null
+        ? existing.copyWith(
+            title: title,
+            location: location.isEmpty ? null : location,
+            clearLocation: location.isEmpty,
+            description: desc.isEmpty ? null : desc,
+            clearDescription: desc.isEmpty,
+            startsAt: startsAt,
+            endsAt: endsAt,
+            updatedAt: now,
+          )
+        : CalendarEvent(
+            id: 'temp_event_${now.microsecondsSinceEpoch}',
+            title: title,
+            location: location.isEmpty ? null : location,
+            description: desc.isEmpty ? null : desc,
+            startsAt: startsAt,
+            endsAt: endsAt,
+            createdAt: now,
+            updatedAt: now,
+          );
+
+    Future<void> backgroundWork() async {
+      try {
+        CalendarEvent saved;
+        if (isEditing && existing != null) {
+          saved = await controller.updateEvent(
+            existing,
+            title: title,
+            location: location.isEmpty ? null : location,
+            includeNullLocation: location.isEmpty,
+            description: desc.isEmpty ? null : desc,
+            includeNullDescription: desc.isEmpty,
+            startsAt: startsAt,
+            endsAt: endsAt,
+          );
+        } else {
+          saved = await controller.createEvent(
+            title: title,
+            location: location.isEmpty ? null : location,
+            description: desc.isEmpty ? null : desc,
+            startsAt: startsAt,
+            endsAt: endsAt,
+          );
+        }
+
+        final notice = await _syncReminderSafely(
+          reminders,
+          saved,
+          remindMe: remindMe,
         );
-      } else {
-        saved = await controller.createEvent(
-          title: title,
-          location: location.isEmpty ? null : location,
-          description: desc.isEmpty ? null : desc,
-          startsAt: startsAt,
-          endsAt: endsAt,
+        if (notice != null) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(notice),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      } on ApiException catch (e) {
+        messenger.showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text('Gagal menyimpan event: ${e.message}'),
+          ),
+        );
+      } catch (_) {
+        messenger.showSnackBar(
+          const SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text('Gagal menyimpan event. Coba lagi.'),
+          ),
         );
       }
+    }
 
-      await _syncReminderSafely(saved);
-
-      if (!mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
-      final notice = _reminderNotice;
-      Navigator.of(context).pop(saved);
+    unawaited(backgroundWork());
+    if (mounted) {
+      Navigator.of(context).pop(optimisticEvent);
       messenger.showSnackBar(
         SnackBar(
-          content: Text(
-            notice ?? (_isEditing ? 'Event updated' : 'Event created'),
-          ),
-          duration: Duration(seconds: notice == null ? 2 : 4),
+          content: Text(isEditing ? 'Event updated' : 'Event created'),
+          duration: const Duration(seconds: 2),
         ),
       );
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _isSaving = false;
-        _errorMessage = e.message;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _isSaving = false;
-        _errorMessage = 'Failed to save event. Please try again.';
-      });
     }
   }
 
   /// Creates/moves/cancels the 15-minute local reminder for the saved event.
   /// Reminder failures never roll back the already-persisted event.
-  Future<void> _syncReminderSafely(CalendarEvent saved) async {
-    final reminders = ref.read(remindersControllerProvider.notifier);
+  static Future<String?> _syncReminderSafely(
+    RemindersController reminders,
+    CalendarEvent saved, {
+    required bool remindMe,
+  }) async {
     try {
-      if (!_remindMe) {
+      if (!remindMe) {
         await reminders.cancelScheduledForTarget(eventId: saved.id);
-        return;
+        return null;
       }
 
       final remindAt = saved.startsAt.subtract(const Duration(minutes: 15));
       if (!remindAt.isAfter(DateTime.now())) {
         await reminders.cancelScheduledForTarget(eventId: saved.id);
-        _reminderNotice =
-            'Event saved. Reminder not scheduled because the start time is '
+        return 'Event saved. Reminder not scheduled because the start time is '
             'less than 15 minutes away.';
-        return;
       }
 
       final result = await reminders.upsertForEvent(
@@ -232,19 +277,20 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
         remindAt: remindAt,
       );
       if (result != null && !result.permissionGranted) {
-        _reminderNotice =
-            'Event saved, but notification permission is off. Enable it in '
+        return 'Event saved, but notification permission is off. Enable it in '
             'Android Settings → Apps → LifeOS → Notifications.';
       }
+      return null;
     } on ApiException catch (error) {
-      _reminderNotice = 'Event saved, but the reminder failed: '
-          '${error.message}';
+      return 'Event saved, but the reminder failed: ${error.message}';
+    } catch (_) {
+      return null;
     }
   }
 
   Future<void> _confirmDelete() async {
     final existing = widget.existingEvent;
-    if (existing == null) return;
+    if (existing == null || _isSaving) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -268,24 +314,29 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
     if (confirmed != true || !mounted) return;
 
     setState(() => _isSaving = true);
-    try {
-      await ref.read(calendarControllerProvider.notifier).deleteEvent(existing);
-      if (!mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
-      Navigator.of(context).pop();
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Event deleted'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _isSaving = false;
-        _errorMessage = e.message;
-      });
-    }
+    HapticFeedback.mediumImpact();
+    final controller = ref.read(calendarControllerProvider.notifier);
+    final messenger = ScaffoldMessenger.of(context);
+
+    unawaited(
+      controller.deleteEvent(existing).catchError((Object e) {
+        final msg = e is ApiException ? e.message : 'Gagal menghapus event.';
+        messenger.showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text(msg),
+          ),
+        );
+      }),
+    );
+
+    Navigator.of(context).pop();
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text('Event deleted'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   String _formatTime(TimeOfDay t) {
@@ -593,22 +644,13 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(
-                          _isEditing ? 'Save Changes' : 'Save Event',
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+                  child: Text(
+                    _isEditing ? 'Save Changes' : 'Save Event',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ],

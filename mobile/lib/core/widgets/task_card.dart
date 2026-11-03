@@ -8,6 +8,7 @@ import 'priority_badge.dart';
 
 /// Task card item matching Google Stitch `My Tasks` (`34ee994c09b04ed695ed6502cd4aebcc`).
 /// Supports one-tap completion with priority-colored circular checkbox and 48x48dp touch target.
+/// Wrapped in `RepaintBoundary` with lightweight shadows (`blurRadius: 10`) for 2GB RAM devices.
 class TaskCard extends StatelessWidget {
   const TaskCard({
     super.key,
@@ -34,128 +35,147 @@ class TaskCard extends StatelessWidget {
     final metaText = _buildMetaText();
     final metaIcon = _resolveMetaIcon(isDone: isDone, isOverdue: isOverdue);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F5B5BF6),
-            blurRadius: 16,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+    return RepaintBoundary(
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              children: [
-                Semantics(
-                  container: true,
-                  label: 'Tandai tugas ${task.title} selesai',
-                  checked: isDone,
-                  button: true,
-                  child: InkWell(
-                    key: ValueKey('task_checkbox_${task.id}'),
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      onToggleDone();
-                    },
-                    child: SizedBox(
-                      width: 44,
-                      height: 44,
-                      child: Center(
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          width: 22,
-                          height: 22,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isDone
-                                ? AppColors.success
-                                : Colors.transparent,
-                            border: Border.all(
-                              color: ringColor,
-                              width: 2,
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0D5B5BF6),
+              blurRadius: 10,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                children: [
+                  Semantics(
+                    container: true,
+                    label: 'Tandai tugas ${task.title} selesai',
+                    checked: isDone,
+                    button: true,
+                    child: InkWell(
+                      key: ValueKey('task_checkbox_${task.id}'),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        onToggleDone();
+                      },
+                      child: SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: Center(
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 160),
+                            curve: Curves.easeOutCubic,
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isDone
+                                  ? AppColors.success
+                                  : Colors.transparent,
+                              border: Border.all(
+                                color: ringColor,
+                                width: 2,
+                              ),
+                            ),
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 150),
+                              transitionBuilder: (child, animation) =>
+                                  ScaleTransition(
+                                scale: animation,
+                                child: child,
+                              ),
+                              child: isDone
+                                  ? const Icon(
+                                      LucideIcons.check,
+                                      key: ValueKey<bool>(true),
+                                      size: 14,
+                                      color: Colors.white,
+                                    )
+                                  : const SizedBox.shrink(
+                                      key: ValueKey<bool>(false),
+                                    ),
                             ),
                           ),
-                          child: isDone
-                              ? const Icon(
-                                  LucideIcons.check,
-                                  size: 14,
-                                  color: Colors.white,
-                                )
-                              : null,
                         ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Opacity(
-                    opacity: isDone ? 0.6 : 1.0,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          task.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.titleSmall?.copyWith(
-                            fontSize: 14,
-                            height: 20 / 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                            decoration: isDone
-                                ? TextDecoration.lineThrough
-                                : TextDecoration.none,
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 160),
+                      opacity: isDone ? 0.6 : 1.0,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 160),
+                            style: (textTheme.titleSmall ?? const TextStyle())
+                                .copyWith(
+                              fontSize: 14,
+                              height: 20 / 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                              decoration: isDone
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
+                            ),
+                            child: Text(
+                              task.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                        if (metaText != null) ...[
-                          const SizedBox(height: 3),
-                          Row(
-                            children: [
-                              Icon(
-                                metaIcon,
-                                size: 13,
-                                color: isOverdue
-                                    ? AppColors.error
-                                    : AppColors.textSecondary,
-                              ),
-                              const SizedBox(width: 5),
-                              Flexible(
-                                child: Text(
-                                  metaText,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: textTheme.labelSmall?.copyWith(
-                                    fontSize: 11,
-                                    height: 14 / 11,
-                                    fontWeight: FontWeight.w500,
-                                    color: isOverdue
-                                        ? AppColors.error
-                                        : AppColors.textSecondary,
+                          if (metaText != null) ...[
+                            const SizedBox(height: 3),
+                            Row(
+                              children: [
+                                Icon(
+                                  metaIcon,
+                                  size: 13,
+                                  color: isOverdue
+                                      ? AppColors.error
+                                      : AppColors.textSecondary,
+                                ),
+                                const SizedBox(width: 5),
+                                Flexible(
+                                  child: Text(
+                                    metaText,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: textTheme.labelSmall?.copyWith(
+                                      fontSize: 11,
+                                      height: 14 / 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: isOverdue
+                                          ? AppColors.error
+                                          : AppColors.textSecondary,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                PriorityBadge(priority: task.priority),
-              ],
+                  const SizedBox(width: 8),
+                  PriorityBadge(priority: task.priority),
+                ],
+              ),
             ),
           ),
         ),

@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/state/data_revision_provider.dart';
 import '../../../core/utils/local_date_time_helper.dart';
+import '../../dashboard/presentation/dashboard_controller.dart';
 import '../data/calendar_repository.dart';
 import '../domain/calendar_event.dart';
 
@@ -77,7 +79,9 @@ class CalendarController extends AsyncNotifier<CalendarAgendaSnapshot> {
 
   @override
   Future<CalendarAgendaSnapshot> build() async {
-    ref.watch(dataRevisionProvider);
+    ref.listen<int>(dataRevisionProvider, (_, _) {
+      unawaited(silentRefresh());
+    });
     final focused = ref.watch(
       calendarViewProvider.select(
         (s) => DateTime(s.focusedDay.year, s.focusedDay.month, 1),
@@ -99,10 +103,25 @@ class CalendarController extends AsyncNotifier<CalendarAgendaSnapshot> {
   Future<void> refresh() async {
     final focused = ref.read(calendarViewProvider).focusedDay;
     final monthStart = DateTime(focused.year, focused.month, 1);
-    state = const AsyncLoading();
+    if (state.value == null) {
+      state = const AsyncLoading();
+    }
     state = await AsyncValue.guard(() => _fetchForMonth(monthStart));
   }
 
+  Future<void> silentRefresh() async {
+    try {
+      final focused = ref.read(calendarViewProvider).focusedDay;
+      final monthStart = DateTime(focused.year, focused.month, 1);
+      final fresh = await _fetchForMonth(monthStart);
+      state = AsyncData(fresh);
+    } catch (_) {
+      // Preserve optimistic/cached state if background sync fails.
+    }
+  }
+
+  /// Optimistically inserts a temporary event into local calendar state (< 50ms)
+  /// before syncing with the backend.
   Future<CalendarEvent> createEvent({
     required String title,
     String? description,
@@ -110,15 +129,69 @@ class CalendarController extends AsyncNotifier<CalendarAgendaSnapshot> {
     required DateTime startsAt,
     required DateTime endsAt,
   }) async {
-    final created = await _repository.createEvent(
+    final now = DateTime.now();
+    final tempId = 'temp_event_${now.microsecondsSinceEpoch}';
+    final tempEvent = CalendarEvent(
+      id: tempId,
       title: title,
       description: description,
       location: location,
       startsAt: startsAt,
       endsAt: endsAt,
+      createdAt: now,
+      updatedAt: now,
     );
-    _notifyDataChanged();
-    return created;
+
+    final previousState = state.value;
+    if (previousState != null) {
+      final updatedEvents = [...previousState.events, tempEvent]
+        ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
+      state = AsyncData(
+        CalendarAgendaSnapshot(
+          from: previousState.from,
+          to: previousState.to,
+          events: updatedEvents,
+          tasks: previousState.tasks,
+          isFromCache: previousState.isFromCache,
+        ),
+      );
+    }
+    ref
+        .read(dashboardControllerProvider.notifier)
+        .optimisticInsertEvent(tempEvent);
+
+    try {
+      final created = await _repository.createEvent(
+        title: title,
+        description: description,
+        location: location,
+        startsAt: startsAt,
+        endsAt: endsAt,
+      );
+
+      final current = state.value;
+      if (current != null) {
+        final reconciled = current.events
+            .map((e) => e.id == tempId ? created : e)
+            .toList(growable: false);
+        state = AsyncData(
+          CalendarAgendaSnapshot(
+            from: current.from,
+            to: current.to,
+            events: reconciled,
+            tasks: current.tasks,
+            isFromCache: current.isFromCache,
+          ),
+        );
+      }
+      _notifyDataChanged();
+      return created;
+    } catch (_) {
+      if (previousState != null) {
+        state = AsyncData(previousState);
+      }
+      rethrow;
+    }
   }
 
   Future<CalendarEvent> updateEvent(
@@ -131,26 +204,96 @@ class CalendarController extends AsyncNotifier<CalendarAgendaSnapshot> {
     DateTime? startsAt,
     DateTime? endsAt,
   }) async {
-    final updated = await _repository.updateEvent(
-      existing.id,
-      title: title,
+    final previousState = state.value;
+    final optimisticEvent = existing.copyWith(
+      title: title ?? existing.title,
       description: description,
-      includeNullDescription: includeNullDescription,
+      clearDescription: includeNullDescription,
       location: location,
-      includeNullLocation: includeNullLocation,
-      startsAt: startsAt,
-      endsAt: endsAt,
+      clearLocation: includeNullLocation,
+      startsAt: startsAt ?? existing.startsAt,
+      endsAt: endsAt ?? existing.endsAt,
+      updatedAt: DateTime.now(),
     );
-    _notifyDataChanged();
-    return updated;
+
+    if (previousState != null) {
+      state = AsyncData(
+        CalendarAgendaSnapshot(
+          from: previousState.from,
+          to: previousState.to,
+          events: previousState.events
+              .map((e) => e.id == existing.id ? optimisticEvent : e)
+              .toList(growable: false),
+          tasks: previousState.tasks,
+          isFromCache: previousState.isFromCache,
+        ),
+      );
+    }
+
+    try {
+      final updated = await _repository.updateEvent(
+        existing.id,
+        title: title,
+        description: description,
+        includeNullDescription: includeNullDescription,
+        location: location,
+        includeNullLocation: includeNullLocation,
+        startsAt: startsAt,
+        endsAt: endsAt,
+      );
+
+      final current = state.value;
+      if (current != null) {
+        state = AsyncData(
+          CalendarAgendaSnapshot(
+            from: current.from,
+            to: current.to,
+            events: current.events
+                .map((e) => e.id == existing.id ? updated : e)
+                .toList(growable: false),
+            tasks: current.tasks,
+            isFromCache: current.isFromCache,
+          ),
+        );
+      }
+      _notifyDataChanged();
+      return updated;
+    } catch (_) {
+      if (previousState != null) {
+        state = AsyncData(previousState);
+      }
+      rethrow;
+    }
   }
 
   Future<void> deleteEvent(CalendarEvent event) async {
-    await _repository.deleteEvent(
-      event.id,
-      reminderIdsToCancel: event.reminderIds,
-    );
-    _notifyDataChanged();
+    final previousState = state.value;
+    if (previousState != null) {
+      state = AsyncData(
+        CalendarAgendaSnapshot(
+          from: previousState.from,
+          to: previousState.to,
+          events: previousState.events
+              .where((e) => e.id != event.id)
+              .toList(growable: false),
+          tasks: previousState.tasks,
+          isFromCache: previousState.isFromCache,
+        ),
+      );
+    }
+
+    try {
+      await _repository.deleteEvent(
+        event.id,
+        reminderIdsToCancel: event.reminderIds,
+      );
+      _notifyDataChanged();
+    } catch (_) {
+      if (previousState != null) {
+        state = AsyncData(previousState);
+      }
+      rethrow;
+    }
   }
 
   void _notifyDataChanged() {

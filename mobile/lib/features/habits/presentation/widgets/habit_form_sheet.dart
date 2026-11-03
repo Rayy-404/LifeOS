@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/theme.dart';
@@ -72,6 +74,7 @@ class _HabitFormSheetState extends ConsumerState<HabitFormSheet> {
   }
 
   void _toggleDay(int day) {
+    HapticFeedback.selectionClick();
     setState(() {
       if (_selectedDays.contains(day)) {
         if (_selectedDays.length > 1) {
@@ -87,6 +90,7 @@ class _HabitFormSheetState extends ConsumerState<HabitFormSheet> {
   }
 
   Future<void> _submit() async {
+    if (_isSaving) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_selectedDays.isEmpty) {
       setState(() => _errorMessage = 'Select at least 1 active day.');
@@ -97,58 +101,87 @@ class _HabitFormSheetState extends ConsumerState<HabitFormSheet> {
       _isSaving = true;
       _errorMessage = null;
     });
+    HapticFeedback.lightImpact();
 
     final sortedDays = _selectedDays.toList()..sort();
     final trimmedName = _nameController.text.trim();
     final trimmedDesc = _descriptionController.text.trim();
     final controller = ref.read(habitsControllerProvider.notifier);
+    final messenger = ScaffoldMessenger.of(context);
+    final isEditing = _isEditing;
+    final existing = widget.existingHabit;
+    final isActive = _isActive;
 
-    try {
-      Habit saved;
-      if (_isEditing) {
-        saved = await controller.updateHabit(
-          widget.existingHabit!,
-          name: trimmedName,
-          description: trimmedDesc.isEmpty ? null : trimmedDesc,
-          includeNullDescription: trimmedDesc.isEmpty,
-          activeDays: sortedDays,
-          isActive: _isActive,
+    final now = DateTime.now();
+    final optimisticHabit = isEditing && existing != null
+        ? existing.copyWith(
+            name: trimmedName,
+            description: trimmedDesc.isEmpty ? null : trimmedDesc,
+            clearDescription: trimmedDesc.isEmpty,
+            activeDays: sortedDays,
+            isActive: isActive,
+            updatedAt: now,
+          )
+        : Habit(
+            id: 'temp_habit_${now.microsecondsSinceEpoch}',
+            name: trimmedName,
+            description: trimmedDesc.isEmpty ? null : trimmedDesc,
+            isActive: true,
+            activeDays: sortedDays,
+            createdAt: now,
+            updatedAt: now,
+          );
+
+    Future<void> backgroundWork() async {
+      try {
+        if (isEditing && existing != null) {
+          await controller.updateHabit(
+            existing,
+            name: trimmedName,
+            description: trimmedDesc.isEmpty ? null : trimmedDesc,
+            includeNullDescription: trimmedDesc.isEmpty,
+            activeDays: sortedDays,
+            isActive: isActive,
+          );
+        } else {
+          await controller.createHabit(
+            name: trimmedName,
+            description: trimmedDesc.isEmpty ? null : trimmedDesc,
+            activeDays: sortedDays,
+          );
+        }
+      } on ApiException catch (e) {
+        messenger.showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text('Gagal menyimpan habit: ${e.message}'),
+          ),
         );
-      } else {
-        saved = await controller.createHabit(
-          name: trimmedName,
-          description: trimmedDesc.isEmpty ? null : trimmedDesc,
-          activeDays: sortedDays,
+      } catch (_) {
+        messenger.showSnackBar(
+          const SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text('Gagal menyimpan habit. Coba lagi.'),
+          ),
         );
       }
+    }
 
-      if (!mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
-      Navigator.of(context).pop(saved);
+    unawaited(backgroundWork());
+    if (mounted) {
+      Navigator.of(context).pop(optimisticHabit);
       messenger.showSnackBar(
         SnackBar(
-          content: Text(_isEditing ? 'Habit updated' : 'Habit created'),
+          content: Text(isEditing ? 'Habit updated' : 'Habit created'),
           duration: const Duration(seconds: 2),
         ),
       );
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _isSaving = false;
-        _errorMessage = e.message;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _isSaving = false;
-        _errorMessage = 'Failed to save habit. Please try again.';
-      });
     }
   }
 
   Future<void> _confirmDelete() async {
     final existing = widget.existingHabit;
-    if (existing == null) return;
+    if (existing == null || _isSaving) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -174,26 +207,29 @@ class _HabitFormSheetState extends ConsumerState<HabitFormSheet> {
     if (confirmed != true || !mounted) return;
 
     setState(() => _isSaving = true);
-    try {
-      await ref
-          .read(habitsControllerProvider.notifier)
-          .deleteHabit(existing.id);
-      if (!mounted) return;
-      final messenger = ScaffoldMessenger.of(context);
-      Navigator.of(context).pop();
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Habit deleted'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _isSaving = false;
-        _errorMessage = e.message;
-      });
-    }
+    HapticFeedback.mediumImpact();
+    final controller = ref.read(habitsControllerProvider.notifier);
+    final messenger = ScaffoldMessenger.of(context);
+
+    unawaited(
+      controller.deleteHabit(existing.id).catchError((Object e) {
+        final msg = e is ApiException ? e.message : 'Gagal menghapus habit.';
+        messenger.showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.error,
+            content: Text(msg),
+          ),
+        );
+      }),
+    );
+
+    Navigator.of(context).pop();
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text('Habit deleted'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
@@ -324,6 +360,7 @@ class _HabitFormSheetState extends ConsumerState<HabitFormSheet> {
                     onTap: () => _toggleDay(day),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 160),
+                      curve: Curves.easeOutCubic,
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
@@ -390,22 +427,13 @@ class _HabitFormSheetState extends ConsumerState<HabitFormSheet> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(
-                          _isEditing ? 'Save Changes' : 'Save Habit',
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+                  child: Text(
+                    _isEditing ? 'Save Changes' : 'Save Habit',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ],

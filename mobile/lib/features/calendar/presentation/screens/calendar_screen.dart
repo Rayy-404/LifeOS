@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -112,16 +113,22 @@ class CalendarScreen extends ConsumerWidget {
                               _ViewSegmentChip(
                                 label: 'Week',
                                 selected: viewState.isWeekMode,
-                                onTap: () => ref
-                                    .read(calendarViewProvider.notifier)
-                                    .setWeekMode(true),
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  ref
+                                      .read(calendarViewProvider.notifier)
+                                      .setWeekMode(true);
+                                },
                               ),
                               _ViewSegmentChip(
                                 label: 'Month',
                                 selected: !viewState.isWeekMode,
-                                onTap: () => ref
-                                    .read(calendarViewProvider.notifier)
-                                    .setWeekMode(false),
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  ref
+                                      .read(calendarViewProvider.notifier)
+                                      .setWeekMode(false);
+                                },
                               ),
                             ],
                           ),
@@ -141,8 +148,8 @@ class CalendarScreen extends ConsumerWidget {
                         boxShadow: const [
                           BoxShadow(
                             color: Color(0x0A5B5BF6),
-                            blurRadius: 16,
-                            offset: Offset(0, 4),
+                            blurRadius: 10,
+                            offset: Offset(0, 3),
                           ),
                         ],
                       ),
@@ -254,8 +261,8 @@ class CalendarScreen extends ConsumerWidget {
                           boxShadow: const [
                             BoxShadow(
                               color: Color(0x0D5B5BF6),
-                              blurRadius: 16,
-                              offset: Offset(0, 4),
+                              blurRadius: 10,
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
@@ -269,11 +276,15 @@ class CalendarScreen extends ConsumerWidget {
 
                             return Expanded(
                               child: GestureDetector(
-                                onTap: () => ref
-                                    .read(calendarViewProvider.notifier)
-                                    .selectDay(day, day),
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  ref
+                                      .read(calendarViewProvider.notifier)
+                                      .selectDay(day, day);
+                                },
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 160),
+                                  curve: Curves.easeOutCubic,
                                   margin:
                                       const EdgeInsets.symmetric(horizontal: 2),
                                   padding:
@@ -286,9 +297,9 @@ class CalendarScreen extends ConsumerWidget {
                                     boxShadow: selected
                                         ? const [
                                             BoxShadow(
-                                              color: Color(0x525B5BF6),
-                                              blurRadius: 16,
-                                              offset: Offset(0, 6),
+                                              color: Color(0x405B5BF6),
+                                              blurRadius: 10,
+                                              offset: Offset(0, 3),
                                             ),
                                           ]
                                         : null,
@@ -543,9 +554,9 @@ class CalendarScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(AppRadius.pill),
                         boxShadow: const [
                           BoxShadow(
-                            color: Color(0x595B5BF6),
-                            blurRadius: 20,
-                            offset: Offset(0, 6),
+                            color: Color(0x405B5BF6),
+                            blurRadius: 12,
+                            offset: Offset(0, 4),
                           ),
                         ],
                       ),
@@ -608,6 +619,7 @@ class _ViewSegmentChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOutCubic,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : Colors.transparent,
@@ -657,157 +669,159 @@ class _TimelineEventRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 64,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  timeLabel,
-                  style: textTheme.labelSmall?.copyWith(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+    return RepaintBoundary(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 64,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    timeLabel,
+                    style: textTheme.labelSmall?.copyWith(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                Text(
-                  periodLabel,
-                  style: textTheme.labelSmall?.copyWith(
-                    fontSize: 10,
-                    color: AppColors.textSecondary,
+                  Text(
+                    periodLabel,
+                    style: textTheme.labelSmall?.copyWith(
+                      fontSize: 10,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Material(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(16),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: onTap,
-              child: IntrinsicHeight(
-                child: Row(
-                  children: [
-                    Container(
-                      width: 6,
-                      color: accentColor,
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    title,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: textTheme.titleSmall?.copyWith(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textPrimary,
+          const SizedBox(width: 8),
+          Expanded(
+            child: Material(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(16),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onTap,
+                child: IntrinsicHeight(
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 6,
+                        color: accentColor,
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: textTheme.titleSmall?.copyWith(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.textPrimary,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        isUrgentMeta
-                                            ? LucideIcons.circleAlert
-                                            : LucideIcons.clock,
-                                        size: 13,
-                                        color: accentColor,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Flexible(
-                                        child: Text(
-                                          metaLeft,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style:
-                                              textTheme.labelSmall?.copyWith(
-                                            fontSize: 11,
-                                            color: isUrgentMeta
-                                                ? accentColor
-                                                : AppColors.textSecondary,
-                                            fontWeight: isUrgentMeta
-                                                ? FontWeight.w600
-                                                : FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                      if (metaRight != null &&
-                                          metaRight!.trim().isNotEmpty) ...[
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          '•',
-                                          style: TextStyle(
-                                            color: AppColors.textSecondary
-                                                .withValues(alpha: 0.4),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
                                         Icon(
-                                          metaRightIcon ?? LucideIcons.mapPin,
+                                          isUrgentMeta
+                                              ? LucideIcons.circleAlert
+                                              : LucideIcons.clock,
                                           size: 13,
                                           color: accentColor,
                                         ),
                                         const SizedBox(width: 4),
                                         Flexible(
                                           child: Text(
-                                            metaRight!,
+                                            metaLeft,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                            style: textTheme.labelSmall
-                                                ?.copyWith(
+                                            style:
+                                                textTheme.labelSmall?.copyWith(
                                               fontSize: 11,
-                                              color: AppColors.textSecondary,
+                                              color: isUrgentMeta
+                                                  ? accentColor
+                                                  : AppColors.textSecondary,
+                                              fontWeight: isUrgentMeta
+                                                  ? FontWeight.w600
+                                                  : FontWeight.w500,
                                             ),
                                           ),
                                         ),
+                                        if (metaRight != null &&
+                                            metaRight!.trim().isNotEmpty) ...[
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            '•',
+                                            style: TextStyle(
+                                              color: AppColors.textSecondary
+                                                  .withValues(alpha: 0.4),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Icon(
+                                            metaRightIcon ?? LucideIcons.mapPin,
+                                            size: 13,
+                                            color: accentColor,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Flexible(
+                                            child: Text(
+                                              metaRight!,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: textTheme.labelSmall
+                                                  ?.copyWith(
+                                                fontSize: 11,
+                                                color: AppColors.textSecondary,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ],
-                                    ],
-                                  ),
-                                ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.85),
-                                shape: BoxShape.circle,
+                              const SizedBox(width: 8),
+                              Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  badgeIcon,
+                                  size: 15,
+                                  color: accentColor,
+                                ),
                               ),
-                              child: Icon(
-                                badgeIcon,
-                                size: 15,
-                                color: accentColor,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

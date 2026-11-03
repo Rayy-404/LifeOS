@@ -143,26 +143,29 @@ class DashboardSnapshot extends Equatable {
     final rawTasks = (json['todayTasks'] as List<dynamic>?) ?? const [];
     final rawHabits = (json['todayHabits'] as List<dynamic>?) ?? const [];
 
+    final tasksRaw = json['tasks'];
+    final habitsRaw = json['habits'];
+
     return DashboardSnapshot(
       date: (json['date'] as String?) ?? '',
       timezone: (json['timezone'] as String?) ?? 'Asia/Jakarta',
       tasks: DashboardTasksSummary.fromJson(
-        (json['tasks'] as Map<String, dynamic>?) ?? const {},
+        tasksRaw is Map ? Map<String, dynamic>.from(tasksRaw) : const {},
       ),
       habits: DashboardHabitsSummary.fromJson(
-        (json['habits'] as Map<String, dynamic>?) ?? const {},
+        habitsRaw is Map ? Map<String, dynamic>.from(habitsRaw) : const {},
       ),
       upcomingEvents: rawEvents
-          .whereType<Map<String, dynamic>>()
-          .map(CalendarEvent.fromJson)
+          .whereType<Map>()
+          .map((e) => CalendarEvent.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
       todayTasks: rawTasks
-          .whereType<Map<String, dynamic>>()
-          .map(Task.fromJson)
+          .whereType<Map>()
+          .map((t) => Task.fromJson(Map<String, dynamic>.from(t)))
           .toList(),
       todayHabits: rawHabits
-          .whereType<Map<String, dynamic>>()
-          .map(Habit.fromJson)
+          .whereType<Map>()
+          .map((h) => Habit.fromJson(Map<String, dynamic>.from(h)))
           .toList(),
       isFromCache: isFromCache,
     );

@@ -43,8 +43,27 @@ class HabitsScreen extends ConsumerWidget {
 
   void _openHabitDetail(BuildContext context, Habit habit) {
     Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => HabitDetailScreen(initialHabit: habit),
+      PageRouteBuilder<void>(
+        transitionDuration: const Duration(milliseconds: 220),
+        reverseTransitionDuration: const Duration(milliseconds: 180),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            HabitDetailScreen(initialHabit: habit),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final curved = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          );
+          return FadeTransition(
+            opacity: curved,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0.04, 0),
+                end: Offset.zero,
+              ).animate(curved),
+              child: child,
+            ),
+          );
+        },
       ),
     );
   }
@@ -112,8 +131,8 @@ class HabitsScreen extends ConsumerWidget {
                                 boxShadow: const [
                                   BoxShadow(
                                     color: Color(0x3D5B5BF6),
-                                    blurRadius: 12,
-                                    offset: Offset(0, 4),
+                                    blurRadius: 10,
+                                    offset: Offset(0, 3),
                                   ),
                                 ],
                               ),
@@ -203,6 +222,7 @@ class HabitsScreen extends ConsumerWidget {
                         (habit) => Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: HabitCard(
+                            key: ValueKey('habit_${habit.id}'),
                             habit: habit,
                             onToggleCheckIn: () =>
                                 _handleToggleCheckIn(context, ref, habit),
@@ -231,87 +251,89 @@ class _HabitsHeroBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF1E2140),
-            Color(0xFF4338CA),
+    return RepaintBoundary(
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF1E2140),
+              Color(0xFF4338CA),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x241E2140),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
           ],
         ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x2E1E2140),
-            blurRadius: 24,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      LucideIcons.flag,
-                      size: 13,
-                      color: Color(0xFFD5D7FF),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      'JOURNEY MODE',
-                      style: textTheme.labelSmall?.copyWith(
-                        fontSize: 10,
-                        letterSpacing: 0.8,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFFD5D7FF),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        LucideIcons.flag,
+                        size: 13,
+                        color: Color(0xFFD5D7FF),
                       ),
+                      const SizedBox(width: 5),
+                      Text(
+                        'JOURNEY MODE',
+                        style: textTheme.labelSmall?.copyWith(
+                          fontSize: 10,
+                          letterSpacing: 0.8,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFFD5D7FF),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Build Better Habits',
+                    style: textTheme.titleMedium?.copyWith(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Build Better Habits',
-                  style: textTheme.titleMedium?.copyWith(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Small steps every day lead to big results. Keep the momentum going!',
-                  style: textTheme.bodySmall?.copyWith(
-                    fontSize: 12,
-                    height: 1.4,
-                    color: Colors.white.withValues(alpha: 0.82),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Small steps every day lead to big results. Keep the momentum going!',
+                    style: textTheme.bodySmall?.copyWith(
+                      fontSize: 12,
+                      height: 1.4,
+                      color: Colors.white.withValues(alpha: 0.82),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
+            const SizedBox(width: 12),
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                LucideIcons.trophy,
+                color: AppColors.warning,
+                size: 26,
+              ),
             ),
-            child: const Icon(
-              LucideIcons.trophy,
-              color: AppColors.warning,
-              size: 26,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
