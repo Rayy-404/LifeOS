@@ -77,6 +77,28 @@ class LocalNotificationService {
     return await androidImplementation.areNotificationsEnabled() ?? false;
   }
 
+  /// Displays an immediate notification, e.g. for testing alerts or urgent triggers.
+  Future<void> showNotification({
+    int id = 1001,
+    required String title,
+    required String body,
+  }) async {
+    await initialize();
+    const androidDetails = AndroidNotificationDetails(
+      channelId,
+      channelName,
+      channelDescription: channelDescription,
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    await _plugin.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: const NotificationDetails(android: androidDetails),
+    );
+  }
+
   Future<void> scheduleReminder({
     required String reminderUuid,
     required String title,

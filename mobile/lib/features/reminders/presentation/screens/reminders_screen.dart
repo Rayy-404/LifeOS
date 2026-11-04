@@ -11,6 +11,7 @@ import '../../../../core/widgets/offline_banner.dart';
 import '../../../../core/widgets/shimmer_skeleton.dart';
 import '../../domain/reminder.dart';
 import '../reminders_controller.dart';
+import '../widgets/reminder_form_sheet.dart';
 
 /// Scheduled reminder management screen reached from the header bell and the
 /// S-10 "Reminders & Alerts" row (`03-technical-spec.md` §4.5, §3.2).
@@ -199,6 +200,15 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                       ),
                     ),
                     IconButton(
+                      onPressed: () => ReminderFormSheet.show(context),
+                      tooltip: 'Tambah Pengingat',
+                      icon: const Icon(
+                        LucideIcons.plus,
+                        size: 21,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    IconButton(
                       onPressed: () => ref
                           .read(remindersControllerProvider.notifier)
                           .refresh(),
@@ -296,13 +306,25 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                     if (items.isEmpty) {
                       return ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
-                        children: const [
-                          AppEmptyState(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        children: [
+                          const AppEmptyState(
                             icon: LucideIcons.bellOff,
                             title: 'Belum ada pengingat',
                             subtitle:
-                                'Aktifkan "Remind me" saat membuat tugas atau '
-                                'kegiatan untuk menjadwalkan notifikasi lokal.',
+                                'Buat pengingat untuk tugas atau kegiatan '
+                                'agar notifikasi lokal muncul tepat waktu.',
+                          ),
+                          const SizedBox(height: 16),
+                          Center(
+                            child: ElevatedButton.icon(
+                              onPressed: () => ReminderFormSheet.show(context),
+                              icon: const Icon(LucideIcons.plus, size: 18),
+                              label: const Text('Tambah Pengingat Baru'),
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(200, 48),
+                              ),
+                            ),
                           ),
                         ],
                       );
@@ -334,6 +356,21 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
               ),
             ),
           ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        key: const ValueKey('add_reminder_fab'),
+        onPressed: () => ReminderFormSheet.show(context),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        icon: const Icon(LucideIcons.plus, size: 20),
+        label: const Text(
+          'Tambah Pengingat',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );

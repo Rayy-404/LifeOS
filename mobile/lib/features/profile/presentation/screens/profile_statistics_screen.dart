@@ -3,11 +3,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../app/router.dart';
 import '../../../../app/theme.dart';
+import '../../../../app/theme_controller.dart';
 import '../../../../core/errors/api_exception.dart';
 import '../../../../core/notifications/local_notification_service.dart';
+import '../../../../core/notifications/notification_settings_controller.dart';
 import '../../../../core/widgets/error_state_card.dart';
 import '../../../../core/widgets/offline_banner.dart';
 import '../../../../core/widgets/shimmer_skeleton.dart';
@@ -63,21 +66,414 @@ class _ProfileStatisticsScreenState
     }
   }
 
-  Future<void> _requestNotificationPermission() async {
-    final granted = await ref
-        .read(localNotificationServiceProvider)
-        .requestPermissions();
-    ref.invalidate(notificationPermissionProvider);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          granted
-              ? 'Notifikasi lokal aktif.'
-              : 'Izin ditolak. Aktifkan lewat Pengaturan Android → Apps → '
-                  'LifeOS → Notifications.',
+  Future<void> _showAppearanceSheet() async {
+    final currentMode = ref.read(themeModeProvider);
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.bottomSheetTop),
         ),
       ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(LucideIcons.palette, size: 20, color: AppColors.primary),
+                        SizedBox(width: 8),
+                        Text(
+                          'Pilih Tampilan (Appearance)',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      icon: const Icon(LucideIcons.x, size: 20, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _AppearanceOptionTile(
+                  icon: LucideIcons.smartphone,
+                  title: 'System Default',
+                  subtitle: 'Mengikuti tema sistem perangkat',
+                  selected: currentMode == ThemeMode.system,
+                  onTap: () {
+                    ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.system);
+                    Navigator.of(ctx).pop();
+                  },
+                ),
+                const SizedBox(height: 10),
+                _AppearanceOptionTile(
+                  icon: LucideIcons.sun,
+                  title: 'Light Mode',
+                  subtitle: 'Tema terang kontras tinggi (Nordic Slate & Ocean Blue)',
+                  selected: currentMode == ThemeMode.light,
+                  onTap: () {
+                    ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.light);
+                    Navigator.of(ctx).pop();
+                  },
+                ),
+                const SizedBox(height: 10),
+                _AppearanceOptionTile(
+                  icon: LucideIcons.moon,
+                  title: 'Dark Mode',
+                  subtitle: 'Tema gelap kontras tinggi (Deep Navy & Midnight)',
+                  selected: currentMode == ThemeMode.dark,
+                  onTap: () {
+                    ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.dark);
+                    Navigator.of(ctx).pop();
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showNotificationSettingsSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.bottomSheetTop),
+        ),
+      ),
+      builder: (ctx) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final notifSettings = ref.watch(notificationSettingsProvider);
+            final permission = ref.watch(notificationPermissionProvider);
+            final isPermissionGranted = permission.value ?? false;
+
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(LucideIcons.bellRing, size: 20, color: AppColors.primary),
+                            SizedBox(width: 8),
+                            Text(
+                              'Pengaturan Notifikasi',
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          icon: const Icon(LucideIcons.x, size: 20, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isPermissionGranted
+                            ? AppColors.successPastel
+                            : AppColors.warningPastel,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isPermissionGranted
+                              ? AppColors.success.withValues(alpha: 0.3)
+                              : AppColors.warning.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isPermissionGranted
+                                ? LucideIcons.circleCheck
+                                : LucideIcons.triangleAlert,
+                            size: 18,
+                            color: isPermissionGranted
+                                ? AppColors.success
+                                : AppColors.warning,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              isPermissionGranted
+                                  ? 'Izin notifikasi sistem aktif'
+                                  : 'Izin notifikasi sistem belum aktif',
+                              style: const TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          if (!isPermissionGranted)
+                            TextButton(
+                              onPressed: () async {
+                                final granted = await ref
+                                    .read(localNotificationServiceProvider)
+                                    .requestPermissions();
+                                ref.invalidate(notificationPermissionProvider);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        granted
+                                            ? 'Izin notifikasi berhasil diberikan.'
+                                            : 'Izin ditolak oleh sistem.',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: const Text('Minta Izin'),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    SwitchListTile.adaptive(
+                      contentPadding: EdgeInsets.zero,
+                      value: notifSettings.enabled,
+                      title: const Text(
+                        'Aktifkan Notifikasi Aplikasi',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      subtitle: const Text(
+                        'Master switch pengingat dan pemberitahuan',
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      ),
+                      activeTrackColor: AppColors.primary,
+                      onChanged: (val) {
+                        ref
+                            .read(notificationSettingsProvider.notifier)
+                            .setEnabled(val);
+                      },
+                    ),
+                    const Divider(height: 1),
+                    SwitchListTile.adaptive(
+                      contentPadding: EdgeInsets.zero,
+                      value: notifSettings.reminderAlerts,
+                      title: const Text(
+                        'Peringatan Deadline & Acara',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      subtitle: const Text(
+                        'Alarm lokal untuk tugas dan agenda kalender',
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      ),
+                      activeTrackColor: AppColors.primary,
+                      onChanged: notifSettings.enabled
+                          ? (val) {
+                              ref
+                                  .read(notificationSettingsProvider.notifier)
+                                  .setReminderAlerts(val);
+                            }
+                          : null,
+                    ),
+                    const Divider(height: 1),
+                    SwitchListTile.adaptive(
+                      contentPadding: EdgeInsets.zero,
+                      value: notifSettings.sound,
+                      title: const Text(
+                        'Suara & Getaran',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      subtitle: const Text(
+                        'Putar nada dering dan getarkan perangkat',
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      ),
+                      activeTrackColor: AppColors.primary,
+                      onChanged: notifSettings.enabled
+                          ? (val) {
+                              ref
+                                  .read(notificationSettingsProvider.notifier)
+                                  .setSound(val);
+                            }
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary, width: 1.2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () async {
+                          await ref
+                              .read(localNotificationServiceProvider)
+                              .showNotification(
+                                title: 'Pengingat LifeOS Berhasil! 🔔',
+                                body:
+                                    'Notifikasi lokal perangkat Anda berfungsi dengan normal.',
+                              );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Notifikasi uji coba berhasil dikirim!'),
+                              ),
+                            );
+                          }
+                        },
+                        icon: const Icon(LucideIcons.bellRing, size: 18),
+                        label: const Text(
+                          'Kirim Notifikasi Uji Coba',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showTimezoneSheet(String currentTz) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.bottomSheetTop),
+        ),
+      ),
+      builder: (ctx) {
+        final now = DateTime.now();
+        final timeStr =
+            DateFormat('HH:mm:ss · d MMMM yyyy', 'id_ID').format(now);
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(LucideIcons.clock, size: 20, color: AppColors.success),
+                        SizedBox(width: 8),
+                        Text(
+                          'Zona Waktu (Timezone)',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      icon: const Icon(LucideIcons.x, size: 20, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceMuted,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border, width: 1),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Zona Waktu Aktif',
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        currentTz,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Waktu lokal sekarang: $timeStr',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                const Text(
+                  'Zona waktu dideteksi secara otomatis dari perangkat Anda untuk '
+                  'memastikan jadwal tugas, kalender, dan notifikasi pengingat akurat.',
+                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text('Tutup'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -90,6 +486,18 @@ class _ProfileStatisticsScreenState
     final habits = ref.watch(habitsControllerProvider).value?.items ?? const [];
     final reminders = ref.watch(remindersControllerProvider).value;
     final permission = ref.watch(notificationPermissionProvider);
+    final notifSettings = ref.watch(notificationSettingsProvider);
+    final themeMode = ref.watch(themeModeProvider);
+
+    final appearanceText = switch (themeMode) {
+      ThemeMode.system => 'System',
+      ThemeMode.dark => 'Dark',
+      ThemeMode.light => 'Light',
+    };
+
+    final notifText = !notifSettings.enabled
+        ? 'Off'
+        : (permission.value == false ? 'Disabled' : 'On');
 
     final userName = user?.name ?? 'LifeOS User';
     final userEmail = user?.email ?? '';
@@ -305,30 +713,33 @@ class _ProfileStatisticsScreenState
                                 ),
                                 const Divider(height: 1),
                                 PreferenceRow(
+                                  key: const ValueKey('profile_notifications_row'),
                                   icon: LucideIcons.bell,
                                   iconColor: AppColors.sky,
                                   iconBg: AppColors.skyPastel,
                                   title: 'Notifications',
-                                  trailingText: permission.value == false
-                                      ? 'Off'
-                                      : 'On',
-                                  onTap: _requestNotificationPermission,
+                                  trailingText: notifText,
+                                  onTap: _showNotificationSettingsSheet,
                                 ),
                                 const Divider(height: 1),
-                                const PreferenceRow(
+                                PreferenceRow(
+                                  key: const ValueKey('profile_appearance_row'),
                                   icon: LucideIcons.palette,
                                   iconColor: AppColors.orange,
                                   iconBg: AppColors.orangePastel,
                                   title: 'Appearance',
-                                  trailingText: 'Light',
+                                  trailingText: appearanceText,
+                                  onTap: _showAppearanceSheet,
                                 ),
                                 const Divider(height: 1),
                                 PreferenceRow(
+                                  key: const ValueKey('profile_timezone_row'),
                                   icon: LucideIcons.clock,
                                   iconColor: AppColors.success,
                                   iconBg: AppColors.successPastel,
                                   title: 'Timezone',
                                   trailingText: userTimezone,
+                                  onTap: () => _showTimezoneSheet(userTimezone),
                                 ),
                                 const Divider(height: 1),
                                 PreferenceRow(
@@ -386,6 +797,83 @@ class _ProfileStatisticsScreenState
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AppearanceOptionTile extends StatelessWidget {
+  const _AppearanceOptionTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.primary.withValues(alpha: 0.1)
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.border,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: selected ? AppColors.primary : AppColors.textSecondary,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                      color: selected
+                          ? AppColors.primary
+                          : AppColors.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (selected)
+              const Icon(
+                LucideIcons.check,
+                size: 18,
+                color: AppColors.primary,
+              ),
           ],
         ),
       ),

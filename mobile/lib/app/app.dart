@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/reminders/presentation/reminder_sync_gate.dart';
 import 'router.dart';
 import 'theme.dart';
+import 'theme_controller.dart';
 
 class LifeOSApp extends ConsumerWidget {
   const LifeOSApp({super.key});
@@ -11,13 +12,14 @@ class LifeOSApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
       title: 'LifeOS',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.light,
+      themeMode: themeMode,
       routerConfig: router,
       builder: (context, child) => ReminderSyncGate(
         child: child ?? const SizedBox.shrink(),
