@@ -63,23 +63,24 @@ Untuk menjaga ruang lingkup tetap realistis, versi pertama **tidak mencakup**:
   - Tombol *check-in* satu sentuhan.
   - Riwayat dan *streak* ditampilkan secara ringkas.
 
-### Design Tokens Awal
+### Design Tokens & Visual Standards (Color Hunt Anti-Slop)
 
 | Elemen | Spesifikasi |
 | :--- | :--- |
-| **Primary** | Indigo `#4F46E5` |
-| **Background** | `#F8FAFC` |
-| **Surface** | `#FFFFFF` |
-| **Primary text** | `#0F172A` |
-| **Secondary text** | `#64748B` |
-| **Success** | `#16A34A` |
-| **Warning** | `#D97706` |
-| **Error** | `#DC2626` |
-| **Radius kartu** | `16 px` |
+| **Canvas / Background** | Off-White `#F9F7F7` |
+| **Surface (Card)** | Pure White `#FFFFFF` |
+| **Border / Muted** | Soft Slate `#DBE2EF` (1px solid crisp border) |
+| **Primary (CTA / Active)** | Ocean Blue `#3F72AF` (solid, zero gradient) |
+| **Primary Text / Dark Panel** | Deep Navy `#112D4E` |
+| **Secondary Text** | Slate Navy `#526D82` |
+| **Success** | Emerald Green `#16A34A` |
+| **Warning** | Amber `#D97706` |
+| **Error** | Crimson Red `#DC2626` |
+| **Radius kartu** | `16 px` (border `1px solid #DBE2EF`) |
 | **Spacing dasar** | `4, 8, 12, 16, 24 px` |
-| **Tipografi** | Material 3, hierarki judul dan isi yang jelas |
+| **Tipografi** | Plus Jakarta Sans / Inter, Material 3, hierarki kontras tegas |
 
-Gunakan Material 3, dukungan tema terang/gelap, area sentuh yang nyaman, dan layout yang responsif terhadap ukuran layar Android. *(Rincian lengkap desain terdapat pada [`02-design-brief.md`](file:///C:/Users/Rey/Documents/Projects/lifeOS/planning/02-design-brief.md)).*
+Gunakan tema Anti-AI-Slop (Solid, Flat, Tactile, High-Contrast & Utilitarian) tanpa gradien dan tanpa efek glassmorphism, dukungan tema terang/gelap, area sentuh minimal `48x48dp`, dan layout yang responsif terhadap ukuran layar Android. *(Rincian lengkap desain terdapat pada [`design/THEME_PROMPT.md`](file:///c:/Users/Rey/Documents/Projects/lifeOS/design/THEME_PROMPT.md) dan [`planning/DESIGN.md`](file:///c:/Users/Rey/Documents/Projects/lifeOS/planning/DESIGN.md)).*
 
 ---
 

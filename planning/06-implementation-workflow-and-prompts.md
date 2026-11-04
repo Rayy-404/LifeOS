@@ -17,8 +17,8 @@
 | `planning/03-technical-spec.md` | Skema `schema.prisma` penuh, 5 SQL constraint, aturan integritas, spesifikasi streak, status reminder, aturan timezone `[startUtc, endUtc)`, kontrak REST `/api/v1` per modul, struktur monorepo, `.env` + docker-compose, acceptance criteria, urutan fase | **KONTRAK TEKNIS (single source of truth)** |
 | `planning/04-architecture-security-testing.md` | Kompatibilitas kontrak, strategi online-first + read cache, sinkronisasi reminder (sequence diagram), keamanan (Argon2id, JWT rotation, Zero IDOR, Throttler, Helmet), strategi testing 4 lapis, 8 matriks uji rilis, keputusan OD-01..OD-06 | **JAMINAN MUTU & KEAMANAN** |
 | `planning/05-engineering-playbooks.md` | 6 playbook operasional dengan prompt: Security Audit, Bug Triage, E2E Testing, Cleanup 2 fase, Atomic Commits, Skill Generator | **SOP OPERASIONAL** |
-| `DESIGN.md` (root) | Design system terbaru (lavender `#5B5BF6`): warna light/dark, tipografi Plus Jakarta Sans, radius, navigasi 4 tab + center FAB, spesifikasi 10 layar, state & mikro-interaksi, anti-patterns | **DESAIN VISUAL TERBARU** |
-| `design/` | Mockup onboarding (`onboarding_current.png`, `onboarding_revised.png`) + `references/` | Aset visual S-01 |
+| `planning/DESIGN.md` | Master design system Anti-AI-Slop (Color Hunt `#F9F7F7` · `#DBE2EF` · `#3F72AF` · `#112D4E` · `#526D82` sesuai `design/THEME_PROMPT.md`): warna flat/solid, tanpa gradien, tipografi Plus Jakarta Sans, radius, navigasi 4 tab + center FAB, spesifikasi 10 layar, state & mikro-interaksi, anti-patterns slop | **DESAIN VISUAL KANONIKAL** |
+| `design/` | Mockup onboarding (`onboarding_current.png`, `onboarding_revised.png`) + `THEME_PROMPT.md` | Panduan Master Tema & Aset visual S-01 |
 
 > ⚠️ **Catatan file rusak:** `design/onboarding_screen.txt` (80 byte) dan `design/onboarding.html` (50 byte) hanya berisi teks error/sampah — bukan konten desain. Disarankan dihapus.
 
@@ -44,7 +44,7 @@
 
 | No | Konflik / Ambiguitas | Rekomendasi |
 | :--- | :--- | :--- |
-| 1 | **Token warna:** `02-design-brief.md` memakai Indigo `#4F46E5` + slate; `DESIGN.md` memakai lavender `#5B5BF6` + soft lavender | **DESIGN.md menang** untuk visual (sudah diimplementasi di `theme.dart`). `02-design-brief.md` tetap dipakai untuk flow/state/aksesibilitas |
+| 1 | **Token warna & Sistem Desain:** Disesuaikan dengan panduan `design/THEME_PROMPT.md` (Color Hunt `#F9F7F7` · `#DBE2EF` · `#3F72AF` · `#112D4E` · `#526D82`) | **Harmonisasi total:** Seluruh dokumen (`DESIGN.md`, `02-design-brief.md`, `03-technical-spec.md`, dan `theme.dart`) diselaraskan 100% pada sistem Flat, Tactile, Zero Gradient & Anti-AI-Slop. |
 | 2 | **Navigasi:** `02-design-brief.md` = 5 tab (Statistics jadi tab); `DESIGN.md` = 4 tab + center FAB, Statistics dari avatar header | **Ikut DESIGN.md** (konsisten dengan `router.dart` saat ini) |
 | 3 | **Bahasa UI:** `DESIGN.md` contoh string Inggris ("Good Morning", "My Tasks"); `01/02` berbahasa Indonesia | Ikut `DESIGN.md` (Inggris) untuk label yang sudah dicontohkan; sisanya Bahasa Indonesia ringkas. Bisa diubah kapan saja |
 | 4 | File rusak `design/onboarding_screen.txt` & `design/onboarding.html` | Hapus (artefak error, bukan konten) |
@@ -157,8 +157,8 @@ KONTEKS — WAJIB DIBACA DULU:
   berlaku di fase ini.
 - planning/04-architecture-security-testing.md §12.3 poin 5 (pembersihan saat logout) dan §13
   (Argon2id, secure storage, throttler, zero IDOR), §14.1 (kasus uji token reuse).
-- planning/02-design-brief.md §4 (S-01/S-02/S-03) + DESIGN.md §6 (S-01/S-02/S-03) +
-  design/onboarding_current.png sebagai referensi visual onboarding.
+- planning/02-design-brief.md §4 (S-01/S-02/S-03) + planning/DESIGN.md §6 (S-01/S-02/S-03) +
+  design/THEME_PROMPT.md (Anti-AI-Slop: zero gradients, flat cards, border 1px #DBE2EF).
 
 BACKEND (backend/src/auth + users) — ikuti §4.1 persis:
 1. register: normalisasi email .trim().toLowerCase(), hash Argon2id, kembalikan user + tokens.
@@ -278,7 +278,7 @@ FLUTTER (features/habits):
 7. Layar S-08: kartu habit dengan pastel icon tile, pill "🔥 N day streak" + "x/y this week",
    progress bar berwarna, tombol check-in bulat 48dp dengan animasi centang ≤200ms + haptic +
    optimistic update; weekly mini-grid 7 lingkaran (hijau=selesai, outlined=hari aktif belum,
-   pudar=libur); hero banner sesuai DESIGN.md.
+   pudar=libur); hero banner sesuai DESIGN.md (solid `#112D4E`, tanpa gradien).
 8. Layar S-09 Habit Detail: heatmap bulan berjalan, chip statistik Current streak (dari API) +
    Best streak & Consistency % (hitung client-side dari GET logs — JANGAN ubah kontrak API),
    editor activeDays via chips, riwayat log.
