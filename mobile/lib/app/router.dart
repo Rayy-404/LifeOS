@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../features/auth/domain/auth_state.dart';
 import '../features/auth/presentation/auth_controller.dart';
@@ -329,7 +330,7 @@ class _MainBottomNavShell extends StatelessWidget {
           ),
           child: SafeArea(
             child: SizedBox(
-              height: 64,
+              height: 68,
               child: Stack(
                 clipBehavior: Clip.none,
                 alignment: Alignment.center,
@@ -337,38 +338,58 @@ class _MainBottomNavShell extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _NavTabItem(
-                          icon: LucideIcons.house,
-                          label: 'Home',
-                          selected: currentIndex == 0,
-                          onTap: () => _selectBranch(0),
+                        // Left Cluster: Home, Tasks
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _SalomonNavTabItem(
+                                key: const ValueKey('nav_home_tab'),
+                                icon: LucideIcons.house,
+                                label: 'Home',
+                                selected: currentIndex == 0,
+                                onTap: () => _selectBranch(0),
+                              ),
+                              _SalomonNavTabItem(
+                                key: const ValueKey('nav_tasks_tab'),
+                                icon: LucideIcons.squareCheckBig,
+                                label: 'Tasks',
+                                selected: currentIndex == 1,
+                                onTap: () => _selectBranch(1),
+                              ),
+                            ],
+                          ),
                         ),
-                        _NavTabItem(
-                          icon: LucideIcons.squareCheckBig,
-                          label: 'Tasks',
-                          selected: currentIndex == 1,
-                          onTap: () => _selectBranch(1),
-                        ),
+                        // Center Gap for Floating Quick Add FAB
                         const SizedBox(width: 56),
-                        _NavTabItem(
-                          icon: LucideIcons.calendar,
-                          label: 'Calendar',
-                          selected: currentIndex == 2,
-                          onTap: () => _selectBranch(2),
-                        ),
-                        _NavTabItem(
-                          icon: LucideIcons.flame,
-                          label: 'Habits',
-                          selected: currentIndex == 3,
-                          onTap: () => _selectBranch(3),
+                        // Right Cluster: Calendar, Habits
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _SalomonNavTabItem(
+                                key: const ValueKey('nav_calendar_tab'),
+                                icon: LucideIcons.calendar,
+                                label: 'Calendar',
+                                selected: currentIndex == 2,
+                                onTap: () => _selectBranch(2),
+                              ),
+                              _SalomonNavTabItem(
+                                key: const ValueKey('nav_habits_tab'),
+                                icon: LucideIcons.flame,
+                                label: 'Habits',
+                                selected: currentIndex == 3,
+                                onTap: () => _selectBranch(3),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
                   Positioned(
-                    top: -20,
+                    top: -18,
                     child: _QuickAddCenterFab(
                       onTap: () => _onQuickAdd(context),
                     ),
@@ -430,8 +451,15 @@ class _QuickAddCenterFabState extends State<_QuickAddCenterFab> {
   }
 }
 
-class _NavTabItem extends StatelessWidget {
-  const _NavTabItem({
+/// Animated expanding pill bottom navigation tab item matching the Salomon /
+/// Google Bottom Bar specification (`DESIGN.md` Section 5).
+///
+/// Smoothly expands horizontally upon selection, revealing the label alongside
+/// the icon in an Anti-AI-Slop tinted pill container with flat solid colors and
+/// crisp 1px borders.
+class _SalomonNavTabItem extends StatefulWidget {
+  const _SalomonNavTabItem({
+    super.key,
     required this.icon,
     required this.label,
     required this.selected,
@@ -444,50 +472,142 @@ class _NavTabItem extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final color = selected ? AppColors.primary : AppColors.textSecondary;
+  State<_SalomonNavTabItem> createState() => _SalomonNavTabItemState();
+}
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: onTap,
-      child: SizedBox(
-        width: 64,
-        height: 50,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedScale(
-              scale: selected ? 1.12 : 1.0,
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOutBack,
-              child: Icon(icon, size: 22, color: color),
-            ),
-            const SizedBox(height: 3),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 160),
-              style: (Theme.of(context).textTheme.labelSmall ??
-                      const TextStyle())
-                  .copyWith(
-                fontSize: 11,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: color,
+class _SalomonNavTabItemState extends State<_SalomonNavTabItem>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 220),
+      value: widget.selected ? 1.0 : 0.0,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _SalomonNavTabItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selected != oldWidget.selected) {
+      if (widget.selected) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, _) {
+        final progress = _animation.value;
+        final currentColor = Color.lerp(
+          AppColors.textSecondary,
+          AppColors.primary,
+          progress,
+        )!;
+        final backgroundColor = Color.lerp(
+          Colors.transparent,
+          AppColors.primary.withValues(alpha: 0.12),
+          progress,
+        )!;
+        final borderColor = Color.lerp(
+          Colors.transparent,
+          AppColors.border,
+          progress,
+        )!;
+
+        return Semantics(
+          label: widget.label,
+          selected: widget.selected,
+          button: true,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+              onTap: widget.onTap,
+              splashColor: AppColors.primary.withValues(alpha: 0.12),
+              highlightColor: AppColors.primary.withValues(alpha: 0.06),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: 48,
+                  minWidth: 44,
+                ),
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10 + (2 * progress),
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: backgroundColor,
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                      border: Border.all(
+                        color: borderColor,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(
+                          widget.icon,
+                          size: 20,
+                          color: currentColor,
+                        ),
+                        ClipRect(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: progress,
+                            child: Opacity(
+                              opacity: progress.clamp(0.0, 1.0),
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 6),
+                                child: Text(
+                                  widget.label,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  overflow: TextOverflow.clip,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: currentColor,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              child: Text(label),
             ),
-            const SizedBox(height: 2),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOutCubic,
-              width: selected ? 14 : 0,
-              height: 2.5,
-              decoration: BoxDecoration(
-                color: selected ? AppColors.primary : Colors.transparent,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
