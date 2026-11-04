@@ -1,7 +1,6 @@
 import * as request from 'supertest';
 import { createJourneyApp } from '../support/journey-app';
 import { expectApiError } from '../support/journey-assertions';
-import { JOURNEY_PASSWORD } from '../support/journey-fixtures';
 
 /**
  * Journey A (bagian keamanan) — rate limiting pada endpoint auth
