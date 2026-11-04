@@ -177,14 +177,9 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0F5B5BF6),
-                  blurRadius: 16,
-                  offset: Offset(0, 4),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(AppRadius.cardLarge),
+              border: Border.all(color: AppColors.border, width: 1),
+              boxShadow: AppShadows.card,
             ),
             child: Row(
               children: [

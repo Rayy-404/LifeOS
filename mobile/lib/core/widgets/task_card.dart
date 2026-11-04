@@ -39,14 +39,9 @@ class TaskCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0D5B5BF6),
-              blurRadius: 10,
-              offset: Offset(0, 3),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(AppRadius.cardSmall),
+          border: Border.all(color: AppColors.border, width: 1),
+          boxShadow: AppShadows.card,
         ),
         child: Material(
           color: Colors.transparent,

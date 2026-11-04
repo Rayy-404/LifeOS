@@ -323,16 +323,9 @@ class _MainBottomNavShell extends StatelessWidget {
         child: Container(
           decoration: const BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(AppRadius.bottomNavTop),
+            border: Border(
+              top: BorderSide(color: AppColors.border, width: 1),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x0F5B5BF6),
-                blurRadius: 12,
-                offset: Offset(0, -3),
-              ),
-            ],
           ),
           child: SafeArea(
             child: SizedBox(
@@ -423,13 +416,7 @@ class _QuickAddCenterFabState extends State<_QuickAddCenterFab> {
             decoration: const BoxDecoration(
               color: AppColors.primary,
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x4D5B5BF6),
-                  blurRadius: 12,
-                  offset: Offset(0, 4),
-                ),
-              ],
+              boxShadow: AppShadows.fab,
             ),
             child: const Icon(
               LucideIcons.plus,

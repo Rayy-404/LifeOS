@@ -73,13 +73,7 @@ class OnboardingScreen extends ConsumerWidget {
                 height: 54,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(AppRadius.pill),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x2E1E2140),
-                      blurRadius: 24,
-                      offset: Offset(0, 10),
-                    ),
-                  ],
+                  boxShadow: AppShadows.hero,
                 ),
                 child: ElevatedButton(
                   key: const ValueKey('onboarding_get_started'),
@@ -156,54 +150,34 @@ class _StitchHeroIllustration extends StatelessWidget {
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 340),
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image.asset(
-              'assets/images/onboarding_hero.png',
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: 280,
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySoft,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      LucideIcons.laptop,
-                      size: 80,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: 56,
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      AppColors.background,
-                      AppColors.background.withValues(alpha: 0.7),
-                      AppColors.background.withValues(alpha: 0.0),
-                    ],
-                  ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.cardLarge),
+          border: Border.all(color: AppColors.border, width: 1),
+          boxShadow: AppShadows.card,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Image.asset(
+          'assets/images/onboarding_hero.png',
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              height: 280,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceMuted,
+                borderRadius: BorderRadius.circular(AppRadius.cardLarge),
+              ),
+              child: const Center(
+                child: Icon(
+                  LucideIcons.laptop,
+                  size: 80,
+                  color: AppColors.primary,
                 ),
               ),
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
     );
   }

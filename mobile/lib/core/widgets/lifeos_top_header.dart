@@ -83,20 +83,11 @@ class LifeOsTopHeader extends ConsumerWidget {
               child: Container(
                 width: 34,
                 height: 34,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [AppColors.navy, AppColors.primary],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x1F5B5BF6),
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
+                  color: AppColors.navy,
+                  border: Border.all(color: AppColors.border, width: 1.5),
+                  boxShadow: AppShadows.card,
                 ),
                 alignment: Alignment.center,
                 child: Text(

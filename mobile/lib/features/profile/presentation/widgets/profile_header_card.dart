@@ -29,13 +29,7 @@ class ProfileHeaderCard extends StatelessWidget {
       decoration: const BoxDecoration(
         color: AppColors.navy,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x2E1E2140),
-            blurRadius: 24,
-            offset: Offset(0, 8),
-          ),
-        ],
+        boxShadow: AppShadows.hero,
       ),
       child: Column(
         children: [
@@ -66,9 +60,7 @@ class ProfileHeaderCard extends StatelessWidget {
             child: Container(
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [AppColors.primary, AppColors.violet],
-                ),
+                color: AppColors.primary,
               ),
               alignment: Alignment.center,
               child: Text(

@@ -165,18 +165,10 @@ class TaskFormCategorySelector extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? const Color(0xFF413EDC)
+                          ? AppColors.primary
                           : AppColors.surfaceMuted,
                       borderRadius: BorderRadius.circular(AppRadius.pill),
-                      boxShadow: isSelected
-                          ? const [
-                              BoxShadow(
-                                color: Color(0x335B5BF6),
-                                blurRadius: 8,
-                                offset: Offset(0, 2),
-                              ),
-                            ]
-                          : null,
+                      boxShadow: isSelected ? AppShadows.activeChip : null,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

@@ -153,14 +153,10 @@ class HabitCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0D5B5BF6),
-                  blurRadius: 10,
-                  offset: Offset(0, 3),
-                ),
-              ],
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.cardSmall),
+              border: Border.all(color: AppColors.border, width: 1),
+              boxShadow: AppShadows.card,
             ),
             child: Column(
               children: [

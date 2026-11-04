@@ -23,15 +23,10 @@ class AuthLogoBadge extends StatelessWidget {
       height: size,
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: const Color(0xFFEBEBFC),
+        color: AppColors.surfaceMuted,
         borderRadius: BorderRadius.circular(size * 0.36),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F5B5BF6),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: AppColors.border, width: 1),
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         children: [

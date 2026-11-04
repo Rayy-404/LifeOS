@@ -733,14 +733,8 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
               width: double.infinity,
               height: 52,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x405B5BF6),
-                    blurRadius: 12,
-                    offset: Offset(0, 4),
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(AppRadius.input),
+                boxShadow: AppShadows.fab,
               ),
               child: ElevatedButton(
                 key: const ValueKey('task_form_save'),
@@ -796,15 +790,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
           decoration: BoxDecoration(
             color: selected ? AppColors.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(AppRadius.pill),
-            boxShadow: selected
-                ? const [
-                    BoxShadow(
-                      color: Color(0x405B5BF6),
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ]
-                : null,
+            boxShadow: selected ? AppShadows.activeChip : null,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -195,14 +195,9 @@ class DashboardScreen extends ConsumerWidget {
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color(0x0D5B5BF6),
-                                  blurRadius: 10,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
+                              borderRadius: BorderRadius.circular(AppRadius.cardLarge),
+                              border: Border.all(color: AppColors.border, width: 1),
+                              boxShadow: AppShadows.card,
                             ),
                             child: Row(
                               children: [
@@ -576,14 +571,9 @@ class _DashboardAgendaCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x0D5B5BF6),
-                blurRadius: 10,
-                offset: Offset(0, 3),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(AppRadius.cardSmall),
+            border: Border.all(color: AppColors.border, width: 1),
+            boxShadow: AppShadows.card,
           ),
           child: IntrinsicHeight(
             child: Row(
@@ -751,14 +741,9 @@ class _StatTile extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0D5B5BF6),
-              blurRadius: 10,
-              offset: Offset(0, 3),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(AppRadius.cardSmall),
+          border: Border.all(color: AppColors.border, width: 1),
+          boxShadow: AppShadows.card,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

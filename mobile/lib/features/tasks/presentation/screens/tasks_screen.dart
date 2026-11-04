@@ -226,14 +226,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         height: 48,
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x0D5B5BF6),
-                              blurRadius: 10,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
+                          borderRadius: BorderRadius.circular(AppRadius.input),
+                          border: Border.all(color: AppColors.border, width: 1),
+                          boxShadow: AppShadows.card,
                         ),
                         child: PopupMenuButton<TaskPriority?>(
                           tooltip: 'Filter tasks',
@@ -317,24 +312,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             decoration: BoxDecoration(
                               color: selected
                                   ? AppColors.primary
-                                  : AppColors.surface,
+                                  : AppColors.surfaceMuted,
                               borderRadius:
                                   BorderRadius.circular(AppRadius.pill),
-                              boxShadow: selected
-                                  ? const [
-                                      BoxShadow(
-                                        color: Color(0x405B5BF6),
-                                        blurRadius: 10,
-                                        offset: Offset(0, 3),
-                                      ),
-                                    ]
-                                  : const [
-                                      BoxShadow(
-                                        color: Color(0x0A5B5BF6),
-                                        blurRadius: 6,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ],
+                              boxShadow: selected ? AppShadows.activeChip : null,
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -504,23 +485,10 @@ class _TodaysMomentumCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              Color(0x66D5D7FF),
-              Colors.white,
-              Colors.white,
-            ],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0D5B5BF6),
-              blurRadius: 10,
-              offset: Offset(0, 3),
-            ),
-          ],
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.cardSmall),
+          border: Border.all(color: AppColors.border, width: 1),
+          boxShadow: AppShadows.card,
         ),
         child: Row(
           children: [
@@ -608,14 +576,9 @@ class _ProTipBanner extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0A5B5BF6),
-            blurRadius: 10,
-            offset: Offset(0, 3),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppRadius.cardSmall),
+        border: Border.all(color: AppColors.border, width: 1),
+        boxShadow: AppShadows.card,
       ),
       child: Row(
         children: [

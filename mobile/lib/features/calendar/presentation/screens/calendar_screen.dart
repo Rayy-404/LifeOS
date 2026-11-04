@@ -144,14 +144,9 @@ class CalendarScreen extends ConsumerWidget {
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x0A5B5BF6),
-                            blurRadius: 10,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(AppRadius.cardSmall),
+                        border: Border.all(color: AppColors.border, width: 1),
+                        boxShadow: AppShadows.card,
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -257,14 +252,9 @@ class CalendarScreen extends ConsumerWidget {
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x0D5B5BF6),
-                              blurRadius: 10,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
+                          borderRadius: BorderRadius.circular(AppRadius.cardSmall),
+                          border: Border.all(color: AppColors.border, width: 1),
+                          boxShadow: AppShadows.card,
                         ),
                         child: Row(
                           children: List.generate(7, (index) {
@@ -294,15 +284,7 @@ class CalendarScreen extends ConsumerWidget {
                                         ? AppColors.primary
                                         : Colors.transparent,
                                     borderRadius: BorderRadius.circular(16),
-                                    boxShadow: selected
-                                        ? const [
-                                            BoxShadow(
-                                              color: Color(0x405B5BF6),
-                                              blurRadius: 10,
-                                              offset: Offset(0, 3),
-                                            ),
-                                          ]
-                                        : null,
+                                    boxShadow: selected ? AppShadows.activeChip : null,
                                   ),
                                   child: Column(
                                     children: [
@@ -552,13 +534,7 @@ class CalendarScreen extends ConsumerWidget {
                       height: 52,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(AppRadius.pill),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x405B5BF6),
-                            blurRadius: 12,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
+                        boxShadow: AppShadows.fab,
                       ),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(

@@ -1,102 +1,107 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// LifeOS UI/UX Design System Tokens (`DESIGN.md`).
+/// LifeOS UI/UX Design System Tokens (`design/THEME_PROMPT.md` & `planning/DESIGN.md`).
+/// Nordic Slate & Deep Ocean Navy (Anti-AI-Slop: Solid, Flat, Tactile, High-Contrast).
 abstract final class AppColors {
-  // Brand & Neutrals (Light Mode)
-  static const Color primary = Color(0xFF5B5BF6);
-  static const Color primaryDark = Color(0xFF4338CA);
-  static const Color primarySoft = Color(0xFFECEBFF);
-  static const Color background = Color(0xFFF4F5FC);
+  // Brand & Neutrals (Light Mode - Color Hunt Anti-Slop Theme)
+  static const Color canvas = Color(0xFFF9F7F7);
+  static const Color background = Color(0xFFF9F7F7);
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceMuted = Color(0xFFF1F2F8);
-  static const Color navy = Color(0xFF1E2140);
-  static const Color textPrimary = Color(0xFF151833);
-  static const Color textSecondary = Color(0xFF8A8FA8);
-  static const Color divider = Color(0xFFEEF0F6);
+  static const Color surfaceMuted = Color(0xFFDBE2EF);
+  static const Color border = Color(0xFFDBE2EF);
+  static const Color primary = Color(0xFF3F72AF);
+  static const Color primaryDark = Color(0xFF356196);
+  static const Color primarySoft = Color(0xFFDBE2EF);
+  static const Color navy = Color(0xFF112D4E);
+  static const Color textPrimary = Color(0xFF112D4E);
+  static const Color textSecondary = Color(0xFF526D82);
+  static const Color divider = Color(0xFFDBE2EF);
 
   // Dark Mode Neutrals
-  static const Color darkBackground = Color(0xFF0F1124);
-  static const Color darkSurface = Color(0xFF1A1D35);
-  static const Color darkSurfaceMuted = Color(0xFF24284A);
-  static const Color darkTextPrimary = Color(0xFFF4F5FC);
-  static const Color darkTextSecondary = Color(0xFF9CA0BC);
-  static const Color darkPrimary = Color(0xFF7C7CFF);
+  static const Color darkBackground = Color(0xFF0B132B);
+  static const Color darkSurface = Color(0xFF111D35);
+  static const Color darkSurfaceMuted = Color(0xFF203354);
+  static const Color darkBorder = Color(0xFF203354);
+  static const Color darkTextPrimary = Color(0xFFF9F7F7);
+  static const Color darkTextSecondary = Color(0xFF8FA2B8);
+  static const Color darkPrimary = Color(0xFF5A8FD8);
 
-  // Semantic Colors (Solid + Pastel Background Pair)
-  static const Color success = Color(0xFF22C55E);
+  // Semantic Colors (Solid + Muted Background Pair)
+  static const Color success = Color(0xFF16A34A);
   static const Color successPastel = Color(0xFFE8F8EE);
-  static const Color warning = Color(0xFFF59E0B);
+  static const Color warning = Color(0xFFD97706);
   static const Color warningPastel = Color(0xFFFEF3E2);
-  static const Color error = Color(0xFFEF4444);
+  static const Color error = Color(0xFFDC2626);
   static const Color errorPastel = Color(0xFFFDECEC);
-  static const Color info = Color(0xFF3B82F6);
-  static const Color infoPastel = Color(0xFFE8F0FE);
+  static const Color info = Color(0xFF3F72AF);
+  static const Color infoPastel = Color(0xFFDBE2EF);
 
-  // Category / Accent Pastels
-  static const Color violet = Color(0xFF8B5CF6);
-  static const Color violetPastel = Color(0xFFF1ECFE);
-  static const Color green = Color(0xFF10B981);
-  static const Color greenPastel = Color(0xFFE6F7F1);
-  static const Color orange = Color(0xFFF97316);
-  static const Color orangePastel = Color(0xFFFEF0E6);
-  static const Color pink = Color(0xFFEC4899);
-  static const Color pinkPastel = Color(0xFFFDEBF4);
-  static const Color sky = Color(0xFF0EA5E9);
-  static const Color skyPastel = Color(0xFFE6F5FC);
+  // Category / Accent Pastels (Flat Solid + Tint)
+  static const Color violet = Color(0xFF112D4E);
+  static const Color violetPastel = Color(0xFFDBE2EF);
+  static const Color green = Color(0xFF16A34A);
+  static const Color greenPastel = Color(0xFFE8F8EE);
+  static const Color orange = Color(0xFFD97706);
+  static const Color orangePastel = Color(0xFFFEF3E2);
+  static const Color pink = Color(0xFFB83280);
+  static const Color pinkPastel = Color(0xFFFDF2F8);
+  static const Color sky = Color(0xFF3F72AF);
+  static const Color skyPastel = Color(0xFFDBE2EF);
 }
 
 abstract final class AppRadius {
-  static const double cardLarge = 20.0;
+  static const double cardLarge = 16.0;
   static const double cardSmall = 16.0;
-  static const double iconTile = 14.0;
-  static const double input = 14.0;
-  static const double bottomNavTop = 24.0;
-  static const double bottomSheetTop = 28.0;
+  static const double iconTile = 12.0;
+  static const double input = 12.0;
+  static const double bottomNavTop = 20.0;
+  static const double bottomSheetTop = 24.0;
   static const double pill = 999.0;
 }
 
-/// Elevation & Shadow tokens (`DESIGN.md` Section 4).
+/// Elevation & Shadow tokens (`design/THEME_PROMPT.md` Section 5).
+/// Minimal, natural, ambient shadows (Zero neon / glow).
 abstract final class AppShadows {
-  /// Soft card shadow: 0 4px 16px rgba(91, 91, 246, 0.06)
+  /// Subtle natural card ambient shadow
   static const List<BoxShadow> card = [
     BoxShadow(
-      color: Color(0x0F5B5BF6),
-      blurRadius: 16,
-      offset: Offset(0, 4),
+      color: Color(0x0D112D4E),
+      blurRadius: 3,
+      offset: Offset(0, 1),
     ),
   ];
 
-  /// Center FAB shadow: 0 6px 16px rgba(91, 91, 246, 0.35)
+  /// Natural FAB shadow (non-neon)
   static const List<BoxShadow> fab = [
     BoxShadow(
-      color: Color(0x595B5BF6),
-      blurRadius: 16,
-      offset: Offset(0, 6),
+      color: Color(0x33112D4E),
+      blurRadius: 8,
+      offset: Offset(0, 2),
     ),
   ];
 
   /// Hero navy banner shadow
   static const List<BoxShadow> hero = [
     BoxShadow(
-      color: Color(0x2E1E2140),
-      blurRadius: 24,
-      offset: Offset(0, 8),
+      color: Color(0x1A112D4E),
+      blurRadius: 8,
+      offset: Offset(0, 2),
     ),
   ];
 
-  /// Elevated pill / active chip shadow
+  /// Active chip / pill subtle shadow
   static const List<BoxShadow> activeChip = [
     BoxShadow(
-      color: Color(0x405B5BF6),
-      blurRadius: 12,
-      offset: Offset(0, 4),
+      color: Color(0x1F112D4E),
+      blurRadius: 4,
+      offset: Offset(0, 1),
     ),
   ];
 }
 
-/// Typography tokens (`DESIGN.md` Section 3).
-/// Font Family: Plus Jakarta Sans for everything.
+/// Typography tokens (`planning/DESIGN.md` Section 3).
+/// Font Family: Plus Jakarta Sans for high-contrast scannability.
 abstract final class AppTypography {
   /// display.hero: 32 / 38, Weight 800
   static TextStyle get displayHero => GoogleFonts.plusJakartaSans(
@@ -163,7 +168,6 @@ abstract final class AppTypography {
       );
 }
 
-
 abstract final class AppTheme {
   static ThemeData get light {
     final baseTextTheme = GoogleFonts.plusJakartaSansTextTheme();
@@ -175,8 +179,8 @@ abstract final class AppTheme {
         primary: AppColors.primary,
         onPrimary: Colors.white,
         primaryContainer: AppColors.primarySoft,
-        onPrimaryContainer: AppColors.primaryDark,
-        secondary: AppColors.violet,
+        onPrimaryContainer: AppColors.navy,
+        secondary: AppColors.navy,
         onSecondary: Colors.white,
         surface: AppColors.surface,
         onSurface: AppColors.textPrimary,
@@ -209,22 +213,23 @@ abstract final class AppTheme {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.cardSmall),
+          side: const BorderSide(color: AppColors.border, width: 1),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceMuted,
+        fillColor: AppColors.surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.input),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: AppColors.border, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.input),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: AppColors.border, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.input),
@@ -233,6 +238,10 @@ abstract final class AppTheme {
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.input),
           borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+        ),
+        hintStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 13,
+          color: AppColors.textSecondary,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -279,7 +288,7 @@ abstract final class AppTheme {
         onPrimary: Colors.white,
         primaryContainer: AppColors.darkSurfaceMuted,
         onPrimaryContainer: AppColors.darkTextPrimary,
-        secondary: AppColors.violet,
+        secondary: AppColors.darkPrimary,
         onSecondary: Colors.white,
         surface: AppColors.darkSurface,
         onSurface: AppColors.darkTextPrimary,
@@ -287,6 +296,7 @@ abstract final class AppTheme {
         onSurfaceVariant: AppColors.darkTextSecondary,
         error: AppColors.error,
         onError: Colors.white,
+        outline: AppColors.darkBorder,
       ),
       textTheme: baseTextTheme.apply(
         bodyColor: AppColors.darkTextPrimary,
@@ -311,6 +321,7 @@ abstract final class AppTheme {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.cardSmall),
+          side: const BorderSide(color: AppColors.darkBorder, width: 1),
         ),
       ),
     );

@@ -127,14 +127,8 @@ class HabitsScreen extends ConsumerWidget {
                               height: 48,
                               decoration: BoxDecoration(
                                 color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(14),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Color(0x3D5B5BF6),
-                                    blurRadius: 10,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ],
+                                borderRadius: BorderRadius.circular(AppRadius.iconTile),
+                                boxShadow: AppShadows.fab,
                               ),
                               child: const Icon(
                                 LucideIcons.plus,
@@ -255,22 +249,9 @@ class _HabitsHeroBanner extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1E2140),
-              Color(0xFF4338CA),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x241E2140),
-              blurRadius: 12,
-              offset: Offset(0, 4),
-            ),
-          ],
+          color: AppColors.navy,
+          borderRadius: BorderRadius.circular(AppRadius.cardLarge),
+          boxShadow: AppShadows.hero,
         ),
         child: Row(
           children: [
@@ -283,7 +264,7 @@ class _HabitsHeroBanner extends StatelessWidget {
                       const Icon(
                         LucideIcons.flag,
                         size: 13,
-                        color: Color(0xFFD5D7FF),
+                        color: AppColors.border,
                       ),
                       const SizedBox(width: 5),
                       Text(
@@ -292,7 +273,7 @@ class _HabitsHeroBanner extends StatelessWidget {
                           fontSize: 10,
                           letterSpacing: 0.8,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFFD5D7FF),
+                          color: AppColors.border,
                         ),
                       ),
                     ],
@@ -312,7 +293,7 @@ class _HabitsHeroBanner extends StatelessWidget {
                     style: textTheme.bodySmall?.copyWith(
                       fontSize: 12,
                       height: 1.4,
-                      color: Colors.white.withValues(alpha: 0.82),
+                      color: AppColors.border,
                     ),
                   ),
                 ],
@@ -349,15 +330,10 @@ class _WeeklyInsightFooterCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            Color(0xFFEBEBFC),
-            Colors.white,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.cardSmall),
+        border: Border.all(color: AppColors.border, width: 1),
+        boxShadow: AppShadows.card,
       ),
       child: Row(
         children: [
