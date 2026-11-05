@@ -27,7 +27,7 @@ class HabitVisualPalette {
         lower.contains('minum') ||
         lower.contains('water') ||
         lower.contains('hydrat')) {
-      return const HabitVisualPalette(
+      return HabitVisualPalette(
         icon: LucideIcons.droplet,
         accentColor: AppColors.success,
         pastelBg: AppColors.successPastel,
@@ -38,7 +38,7 @@ class HabitVisualPalette {
         lower.contains('read') ||
         lower.contains('study') ||
         lower.contains('belajar')) {
-      return const HabitVisualPalette(
+      return HabitVisualPalette(
         icon: LucideIcons.bookOpen,
         accentColor: AppColors.violet,
         pastelBg: AppColors.violetPastel,
@@ -49,7 +49,7 @@ class HabitVisualPalette {
         lower.contains('workout') ||
         lower.contains('gym') ||
         lower.contains('run')) {
-      return const HabitVisualPalette(
+      return HabitVisualPalette(
         icon: LucideIcons.dumbbell,
         accentColor: AppColors.orange,
         pastelBg: AppColors.orangePastel,
@@ -59,14 +59,14 @@ class HabitVisualPalette {
         lower.contains('leetcode') ||
         lower.contains('koding') ||
         lower.contains('program')) {
-      return const HabitVisualPalette(
+      return HabitVisualPalette(
         icon: LucideIcons.terminal,
         accentColor: AppColors.sky,
         pastelBg: AppColors.skyPastel,
       );
     }
 
-    const palettes = [
+    final palettes = [
       HabitVisualPalette(
         icon: LucideIcons.flame,
         accentColor: AppColors.primary,

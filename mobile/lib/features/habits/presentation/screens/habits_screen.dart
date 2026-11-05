@@ -261,7 +261,7 @@ class _HabitsHeroBanner extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         LucideIcons.flag,
                         size: 13,
                         color: AppColors.border,
@@ -307,7 +307,7 @@ class _HabitsHeroBanner extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 LucideIcons.trophy,
                 color: AppColors.warning,
                 size: 26,
@@ -344,7 +344,7 @@ class _WeeklyInsightFooterCard extends StatelessWidget {
               color: Colors.white,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               LucideIcons.sparkles,
               size: 18,
               color: AppColors.primary,

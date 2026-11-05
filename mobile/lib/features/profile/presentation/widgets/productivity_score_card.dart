@@ -46,7 +46,7 @@ class ProductivityScoreCard extends StatelessWidget {
                     value: (metrics / 100).clamp(0, 1),
                     strokeWidth: 7,
                     backgroundColor: AppColors.primarySoft,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
+                    valueColor: AlwaysStoppedAnimation<Color>(
                       AppColors.primary,
                     ),
                     strokeCap: StrokeCap.round,

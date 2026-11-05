@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lifeos_mobile/app/theme.dart';
 import 'package:lifeos_mobile/app/theme_controller.dart';
 import 'package:lifeos_mobile/core/notifications/local_notification_service.dart';
 import 'package:lifeos_mobile/core/notifications/notification_settings_controller.dart';
@@ -37,9 +38,13 @@ void main() {
       );
 
       expect(notifierContainer.read(themeModeProvider), ThemeMode.light);
+      expect(AppColors.isDark, isFalse);
+      expect(AppColors.background, AppColors.lightBackground);
+      expect(AppColors.surface, AppColors.lightSurface);
+      expect(AppColors.textPrimary, AppColors.lightTextPrimary);
     });
 
-    test('updates theme mode and persists to SharedPreferences', () async {
+    test('updates theme mode and persists to SharedPreferences, switching AppColors', () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
 
@@ -52,10 +57,22 @@ void main() {
       await container.read(themeModeProvider.notifier).setThemeMode(ThemeMode.dark);
       expect(container.read(themeModeProvider), ThemeMode.dark);
       expect(prefs.getString('app_theme_mode'), 'dark');
+      expect(AppColors.isDark, isTrue);
+      expect(AppColors.background, const Color(0xFF0B132B));
+      expect(AppColors.surface, const Color(0xFF111D35));
+      expect(AppColors.textPrimary, const Color(0xFFF9F7F7));
+      expect(AppColors.primary, const Color(0xFF5A8FD8));
+      expect(AppColors.border, const Color(0xFF203354));
 
-      await container.read(themeModeProvider.notifier).setThemeMode(ThemeMode.system);
-      expect(container.read(themeModeProvider), ThemeMode.system);
-      expect(prefs.getString('app_theme_mode'), 'system');
+      await container.read(themeModeProvider.notifier).setThemeMode(ThemeMode.light);
+      expect(container.read(themeModeProvider), ThemeMode.light);
+      expect(prefs.getString('app_theme_mode'), 'light');
+      expect(AppColors.isDark, isFalse);
+      expect(AppColors.background, const Color(0xFFF9F7F7));
+      expect(AppColors.surface, const Color(0xFFFFFFFF));
+      expect(AppColors.textPrimary, const Color(0xFF112D4E));
+      expect(AppColors.primary, const Color(0xFF3F72AF));
+      expect(AppColors.border, const Color(0xFFDBE2EF));
     });
 
     test('initializes with saved theme mode from SharedPreferences', () async {
@@ -69,6 +86,9 @@ void main() {
       );
 
       expect(container.read(themeModeProvider), ThemeMode.dark);
+      expect(AppColors.isDark, isTrue);
+      expect(AppColors.background, AppColors.darkBackground);
+      expect(AppColors.surface, AppColors.darkSurface);
     });
   });
 

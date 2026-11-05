@@ -26,9 +26,9 @@ class ProfileHeaderCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.navy,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
         boxShadow: AppShadows.hero,
       ),
       child: Column(
@@ -58,7 +58,7 @@ class ProfileHeaderCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.primary,
               ),
@@ -162,7 +162,7 @@ class NavyStatColumn extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             color: AppColors.textSecondary,
           ),

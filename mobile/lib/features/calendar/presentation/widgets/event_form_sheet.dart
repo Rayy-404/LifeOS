@@ -231,9 +231,9 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
         );
       } catch (_) {
         messenger.showSnackBar(
-          const SnackBar(
+          SnackBar(
             backgroundColor: AppColors.error,
-            content: Text('Gagal menyimpan event. Coba lagi.'),
+            content: const Text('Gagal menyimpan event. Coba lagi.'),
           ),
         );
       }
@@ -352,9 +352,9 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
 
     return Container(
       padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Form(
         key: _formKey,
@@ -389,7 +389,7 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
                     IconButton(
                       onPressed: _isSaving ? null : _confirmDelete,
                       tooltip: 'Delete event',
-                      icon: const Icon(
+                      icon: Icon(
                         LucideIcons.trash2,
                         color: AppColors.error,
                         size: 20,
@@ -459,7 +459,7 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               LucideIcons.calendar,
                               size: 16,
                               color: AppColors.primary,
@@ -497,7 +497,7 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
+                            Icon(
                               LucideIcons.clock,
                               size: 15,
                               color: AppColors.primary,
@@ -579,11 +579,11 @@ class _EventFormSheetState extends ConsumerState<EventFormSheet> {
                         Container(
                           width: 36,
                           height: 36,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             color: AppColors.skyPastel,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             LucideIcons.bellRing,
                             size: 18,
                             color: AppColors.sky,

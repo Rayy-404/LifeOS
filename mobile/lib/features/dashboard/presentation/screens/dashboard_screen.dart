@@ -225,7 +225,7 @@ class DashboardScreen extends ConsumerWidget {
                                               backgroundColor:
                                                   AppColors.primarySoft,
                                               valueColor:
-                                                  const AlwaysStoppedAnimation<
+                                                  AlwaysStoppedAnimation<
                                                       Color>(
                                                 AppColors.primary,
                                               ),
@@ -270,7 +270,7 @@ class DashboardScreen extends ConsumerWidget {
                                           Container(
                                             width: 6,
                                             height: 6,
-                                            decoration: const BoxDecoration(
+                                            decoration: BoxDecoration(
                                               color: AppColors.success,
                                               shape: BoxShape.circle,
                                             ),
@@ -290,7 +290,7 @@ class DashboardScreen extends ConsumerWidget {
                                     ],
                                   ),
                                 ),
-                                const Icon(
+                                Icon(
                                   LucideIcons.chevronRight,
                                   size: 20,
                                   color: AppColors.textSecondary,
@@ -636,7 +636,7 @@ class _DashboardAgendaCard extends StatelessWidget {
                         const SizedBox(height: 3),
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               LucideIcons.mapPin,
                               size: 14,
                               color: AppColors.textSecondary,
@@ -659,7 +659,7 @@ class _DashboardAgendaCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   LucideIcons.chevronRight,
                   size: 20,
                   color: AppColors.textSecondary,

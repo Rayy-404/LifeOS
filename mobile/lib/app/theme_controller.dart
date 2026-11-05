@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/storage/local_cache_service.dart';
+import 'theme.dart';
 
 final themeModeProvider =
     NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
@@ -12,18 +14,31 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
   ThemeMode build() {
     final prefs = ref.watch(sharedPreferencesProvider);
     final saved = prefs.getString(_key);
+    final ThemeMode mode;
     switch (saved) {
       case 'dark':
-        return ThemeMode.dark;
+        mode = ThemeMode.dark;
+        break;
       case 'system':
-        return ThemeMode.system;
+        mode = ThemeMode.system;
+        break;
       case 'light':
       default:
-        return ThemeMode.light;
+        mode = ThemeMode.light;
+        break;
     }
+    final platformBrightness =
+        SchedulerBinding.instance.platformDispatcher.platformBrightness;
+    AppColors.isDark = mode == ThemeMode.dark ||
+        (mode == ThemeMode.system && platformBrightness == Brightness.dark);
+    return mode;
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
+    final platformBrightness =
+        SchedulerBinding.instance.platformDispatcher.platformBrightness;
+    AppColors.isDark = mode == ThemeMode.dark ||
+        (mode == ThemeMode.system && platformBrightness == Brightness.dark);
     state = mode;
     final prefs = ref.read(sharedPreferencesProvider);
     String val;

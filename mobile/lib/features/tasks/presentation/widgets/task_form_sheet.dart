@@ -260,9 +260,9 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         );
       } catch (_) {
         messenger.showSnackBar(
-          const SnackBar(
+          SnackBar(
             backgroundColor: AppColors.error,
-            content: Text('Gagal menyimpan item. Periksa koneksi Anda.'),
+            content: const Text('Gagal menyimpan item. Periksa koneksi Anda.'),
           ),
         );
       }
@@ -421,7 +421,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                       IconButton(
                         tooltip: 'Delete task',
                         onPressed: _isSubmitting ? null : _delete,
-                        icon: const Icon(
+                        icon: Icon(
                           LucideIcons.trash2,
                           color: AppColors.error,
                           size: 19,
@@ -435,11 +435,11 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                       child: Container(
                         width: 32,
                         height: 32,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           color: AppColors.surfaceMuted,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           LucideIcons.x,
                           size: 16,
                           color: AppColors.textSecondary,
@@ -491,7 +491,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     LucideIcons.filePenLine,
                     size: 19,
                     color: AppColors.textSecondary,
@@ -528,7 +528,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                       if (value.text.isEmpty) return const SizedBox.shrink();
                       return GestureDetector(
                         onTap: _titleController.clear,
-                        child: const Icon(
+                        child: Icon(
                           LucideIcons.circleX,
                           size: 18,
                           color: AppColors.textSecondary,
@@ -563,8 +563,8 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 6),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
                     child: Icon(
                       LucideIcons.fileText,
                       size: 19,
@@ -616,7 +616,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             LucideIcons.calendar,
                             size: 16,
                             color: AppColors.primary,
@@ -650,7 +650,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             LucideIcons.clock,
                             size: 16,
                             color: AppColors.textSecondary,
@@ -689,7 +689,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             LucideIcons.repeat,
                             size: 16,
                             color: AppColors.textSecondary,

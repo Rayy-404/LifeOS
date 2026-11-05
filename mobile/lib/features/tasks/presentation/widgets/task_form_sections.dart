@@ -235,11 +235,11 @@ class RemindMeToggle extends StatelessWidget {
               Container(
                 width: 36,
                 height: 36,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.skyPastel,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   LucideIcons.bellRing,
                   size: 18,
                   color: AppColors.sky,

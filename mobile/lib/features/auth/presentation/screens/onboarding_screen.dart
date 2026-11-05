@@ -33,14 +33,14 @@ class OnboardingScreen extends ConsumerWidget {
               const AuthLogoBadge(size: 44),
               const SizedBox(height: 24),
               Text.rich(
-                const TextSpan(
+                TextSpan(
                   children: [
-                    TextSpan(text: 'Your Life,\n'),
+                    const TextSpan(text: 'Your Life,\n'),
                     TextSpan(
                       text: 'Organized\n',
                       style: TextStyle(color: AppColors.primary),
                     ),
-                    TextSpan(text: 'in One Place'),
+                    const TextSpan(text: 'in One Place'),
                   ],
                 ),
                 style: textTheme.headlineMedium?.copyWith(
@@ -168,7 +168,7 @@ class _StitchHeroIllustration extends StatelessWidget {
                 color: AppColors.surfaceMuted,
                 borderRadius: BorderRadius.circular(AppRadius.cardLarge),
               ),
-              child: const Center(
+              child: Center(
                 child: Icon(
                   LucideIcons.laptop,
                   size: 80,

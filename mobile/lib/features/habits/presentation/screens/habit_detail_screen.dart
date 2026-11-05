@@ -134,7 +134,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: AppColors.textPrimary),
+          icon: Icon(LucideIcons.arrowLeft, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -148,7 +148,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
         actions: [
           IconButton(
             tooltip: 'Edit Habit',
-            icon: const Icon(
+            icon: Icon(
               LucideIcons.pencil,
               size: 20,
               color: AppColors.textPrimary,
@@ -429,11 +429,11 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                     Container(
                       width: 28,
                       height: 28,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         color: AppColors.successPastel,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         LucideIcons.check,
                         size: 15,
                         color: AppColors.success,

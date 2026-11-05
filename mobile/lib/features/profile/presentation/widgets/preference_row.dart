@@ -45,7 +45,7 @@ class PreferenceRow extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -59,14 +59,14 @@ class PreferenceRow extends StatelessWidget {
                   Container(
                     width: 20,
                     height: 20,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.error,
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       '$badgeCount',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -78,14 +78,14 @@ class PreferenceRow extends StatelessWidget {
                 if (trailingText != null) ...[
                   Text(
                     trailingText!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(width: 4),
                 ],
-                const Icon(
+                Icon(
                   LucideIcons.chevronRight,
                   size: 18,
                   color: AppColors.textSecondary,

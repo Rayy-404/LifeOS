@@ -87,10 +87,10 @@ class _ProfileStatisticsScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Row(
+                    Row(
                       children: [
                         Icon(LucideIcons.palette, size: 20, color: AppColors.primary),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text(
                           'Pilih Tampilan (Appearance)',
                           style: TextStyle(
@@ -103,7 +103,7 @@ class _ProfileStatisticsScreenState
                     ),
                     IconButton(
                       onPressed: () => Navigator.of(ctx).pop(),
-                      icon: const Icon(LucideIcons.x, size: 20, color: AppColors.textSecondary),
+                      icon: Icon(LucideIcons.x, size: 20, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -174,10 +174,10 @@ class _ProfileStatisticsScreenState
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
+                        Row(
                           children: [
                             Icon(LucideIcons.bellRing, size: 20, color: AppColors.primary),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
                               'Pengaturan Notifikasi',
                               style: TextStyle(
@@ -190,7 +190,7 @@ class _ProfileStatisticsScreenState
                         ),
                         IconButton(
                           onPressed: () => Navigator.of(ctx).pop(),
-                          icon: const Icon(LucideIcons.x, size: 20, color: AppColors.textSecondary),
+                          icon: Icon(LucideIcons.x, size: 20, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
@@ -226,7 +226,7 @@ class _ProfileStatisticsScreenState
                               isPermissionGranted
                                   ? 'Izin notifikasi sistem aktif'
                                   : 'Izin notifikasi sistem belum aktif',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
@@ -261,7 +261,7 @@ class _ProfileStatisticsScreenState
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       value: notifSettings.enabled,
-                      title: const Text(
+                      title: Text(
                         'Aktifkan Notifikasi Aplikasi',
                         style: TextStyle(
                           fontSize: 14,
@@ -269,7 +269,7 @@ class _ProfileStatisticsScreenState
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      subtitle: const Text(
+                      subtitle: Text(
                         'Master switch pengingat dan pemberitahuan',
                         style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                       ),
@@ -284,7 +284,7 @@ class _ProfileStatisticsScreenState
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       value: notifSettings.reminderAlerts,
-                      title: const Text(
+                      title: Text(
                         'Peringatan Deadline & Acara',
                         style: TextStyle(
                           fontSize: 14,
@@ -292,7 +292,7 @@ class _ProfileStatisticsScreenState
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      subtitle: const Text(
+                      subtitle: Text(
                         'Alarm lokal untuk tugas dan agenda kalender',
                         style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                       ),
@@ -309,7 +309,7 @@ class _ProfileStatisticsScreenState
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       value: notifSettings.sound,
-                      title: const Text(
+                      title: Text(
                         'Suara & Getaran',
                         style: TextStyle(
                           fontSize: 14,
@@ -317,7 +317,7 @@ class _ProfileStatisticsScreenState
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      subtitle: const Text(
+                      subtitle: Text(
                         'Putar nada dering dan getarkan perangkat',
                         style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                       ),
@@ -337,7 +337,7 @@ class _ProfileStatisticsScreenState
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primary,
-                          side: const BorderSide(color: AppColors.primary, width: 1.2),
+                          side: BorderSide(color: AppColors.primary, width: 1.2),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -398,10 +398,10 @@ class _ProfileStatisticsScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Row(
+                    Row(
                       children: [
                         Icon(LucideIcons.clock, size: 20, color: AppColors.success),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text(
                           'Zona Waktu (Timezone)',
                           style: TextStyle(
@@ -414,7 +414,7 @@ class _ProfileStatisticsScreenState
                     ),
                     IconButton(
                       onPressed: () => Navigator.of(ctx).pop(),
-                      icon: const Icon(LucideIcons.x, size: 20, color: AppColors.textSecondary),
+                      icon: Icon(LucideIcons.x, size: 20, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -430,14 +430,14 @@ class _ProfileStatisticsScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Zona Waktu Aktif',
                         style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         currentTz,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -446,7 +446,7 @@ class _ProfileStatisticsScreenState
                       const SizedBox(height: 8),
                       Text(
                         'Waktu lokal sekarang: $timeStr',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           color: AppColors.textSecondary,
                         ),
@@ -455,7 +455,7 @@ class _ProfileStatisticsScreenState
                   ),
                 ),
                 const SizedBox(height: 14),
-                const Text(
+                Text(
                   'Zona waktu dideteksi secara otomatis dari perangkat Anda untuk '
                   'memastikan jadwal tugas, kalender, dan notifikasi pengingat akurat.',
                   style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
@@ -530,7 +530,7 @@ class _ProfileStatisticsScreenState
                           context.go(AppRoutes.dashboard);
                         }
                       },
-                      icon: const Icon(
+                      icon: Icon(
                         LucideIcons.chevronLeft,
                         size: 22,
                         color: AppColors.textPrimary,
@@ -554,7 +554,7 @@ class _ProfileStatisticsScreenState
                         applicationVersion: '1.0.0 MVP',
                       ),
                       tooltip: 'About LifeOS',
-                      icon: const Icon(
+                      icon: Icon(
                         LucideIcons.circleHelp,
                         size: 20,
                         color: AppColors.textPrimary,
@@ -641,7 +641,7 @@ class _ProfileStatisticsScreenState
                                       ),
                                     ),
                                     const SizedBox(width: 4),
-                                    const Icon(
+                                    Icon(
                                       LucideIcons.chevronDown,
                                       size: 14,
                                       color: AppColors.textSecondary,
@@ -771,7 +771,7 @@ class _ProfileStatisticsScreenState
                               key: const ValueKey('profile_logout'),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppColors.error,
-                                side: const BorderSide(
+                                side: BorderSide(
                                   color: AppColors.error,
                                   width: 1.2,
                                 ),
@@ -860,7 +860,7 @@ class _AppearanceOptionTile extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11.5,
                       color: AppColors.textSecondary,
                     ),
@@ -869,7 +869,7 @@ class _AppearanceOptionTile extends StatelessWidget {
               ),
             ),
             if (selected)
-              const Icon(
+              Icon(
                 LucideIcons.check,
                 size: 18,
                 color: AppColors.primary,

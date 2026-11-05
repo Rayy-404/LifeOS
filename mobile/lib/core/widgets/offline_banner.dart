@@ -17,7 +17,7 @@ class OfflineBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             LucideIcons.wifiOff,
             size: 16,
             color: AppColors.warning,

@@ -234,10 +234,10 @@ class _ReminderFormSheetState extends ConsumerState<ReminderFormSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Row(
+                Row(
                   children: [
                     Icon(LucideIcons.bellPlus, size: 20, color: AppColors.primary),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
                       'Tambah Pengingat',
                       style: TextStyle(
@@ -250,12 +250,12 @@ class _ReminderFormSheetState extends ConsumerState<ReminderFormSheet> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(LucideIcons.x, size: 20, color: AppColors.textSecondary),
+                  icon: Icon(LucideIcons.x, size: 20, color: AppColors.textSecondary),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Tautkan Ke',
               style: TextStyle(
                 fontSize: 13,
@@ -307,7 +307,7 @@ class _ReminderFormSheetState extends ConsumerState<ReminderFormSheet> {
                     color: AppColors.surfaceMuted,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Belum ada tugas aktif. Gunakan opsi "Catatan Baru" di atas untuk membuat pengingat langsung.',
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
@@ -348,7 +348,7 @@ class _ReminderFormSheetState extends ConsumerState<ReminderFormSheet> {
                     color: AppColors.surfaceMuted,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Belum ada kegiatan di kalender. Gunakan opsi "Catatan Baru" di atas untuk membuat pengingat langsung.',
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
@@ -383,7 +383,7 @@ class _ReminderFormSheetState extends ConsumerState<ReminderFormSheet> {
                 ),
             ],
             const SizedBox(height: 18),
-            const Text(
+            Text(
               'Waktu Pengingat',
               style: TextStyle(
                 fontSize: 13,
@@ -427,19 +427,19 @@ class _ReminderFormSheetState extends ConsumerState<ReminderFormSheet> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(LucideIcons.clock, size: 18, color: AppColors.primary),
+                    Icon(LucideIcons.clock, size: 18, color: AppColors.primary),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         dateFormatted,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
                         ),
                       ),
                     ),
-                    const Icon(LucideIcons.pencil, size: 16, color: AppColors.textSecondary),
+                    Icon(LucideIcons.pencil, size: 16, color: AppColors.textSecondary),
                   ],
                 ),
               ),
@@ -553,7 +553,7 @@ class _PresetChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,

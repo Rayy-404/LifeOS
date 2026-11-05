@@ -156,9 +156,9 @@ class WeeklyTrendChartCard extends StatelessWidget {
           if (showHabits) ...[
             const SizedBox(height: 8),
             Row(
-              children: const [
+              children: [
                 LegendDot(color: AppColors.primary, label: 'Completed'),
-                SizedBox(width: 14),
+                const SizedBox(width: 14),
                 LegendDot(color: AppColors.primarySoft, label: 'Scheduled'),
               ],
             ),
@@ -188,7 +188,7 @@ class LegendDot extends StatelessWidget {
         const SizedBox(width: 5),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 10,
             color: AppColors.textSecondary,
           ),

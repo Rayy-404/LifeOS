@@ -99,7 +99,7 @@ class MetricCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             data.label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w500,
               color: AppColors.textSecondary,

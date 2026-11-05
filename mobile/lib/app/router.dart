@@ -322,7 +322,7 @@ class _MainBottomNavShell extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: RepaintBoundary(
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: AppColors.surface,
             border: Border(
               top: BorderSide(color: AppColors.border, width: 1),
@@ -434,7 +434,7 @@ class _QuickAddCenterFabState extends State<_QuickAddCenterFab> {
           child: Container(
             width: 56,
             height: 56,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.primary,
               shape: BoxShape.circle,
               boxShadow: AppShadows.fab,

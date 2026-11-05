@@ -159,9 +159,9 @@ class _HabitFormSheetState extends ConsumerState<HabitFormSheet> {
         );
       } catch (_) {
         messenger.showSnackBar(
-          const SnackBar(
+          SnackBar(
             backgroundColor: AppColors.error,
-            content: Text('Gagal menyimpan habit. Coba lagi.'),
+            content: const Text('Gagal menyimpan habit. Coba lagi.'),
           ),
         );
       }
@@ -239,9 +239,9 @@ class _HabitFormSheetState extends ConsumerState<HabitFormSheet> {
 
     return Container(
       padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Form(
         key: _formKey,
@@ -276,7 +276,7 @@ class _HabitFormSheetState extends ConsumerState<HabitFormSheet> {
                     IconButton(
                       onPressed: _isSaving ? null : _confirmDelete,
                       tooltip: 'Delete habit',
-                      icon: const Icon(
+                      icon: Icon(
                         LucideIcons.trash2,
                         color: AppColors.error,
                         size: 20,

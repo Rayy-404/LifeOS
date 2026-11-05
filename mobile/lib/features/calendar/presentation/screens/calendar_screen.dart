@@ -206,8 +206,8 @@ class CalendarScreen extends ConsumerWidget {
                                       .read(calendarViewProvider.notifier)
                                       .selectDay(step, step);
                                 },
-                                child: const Padding(
-                                  padding: EdgeInsets.all(4),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4),
                                   child: Icon(
                                     LucideIcons.chevronLeft,
                                     size: 18,
@@ -231,8 +231,8 @@ class CalendarScreen extends ConsumerWidget {
                                       .read(calendarViewProvider.notifier)
                                       .selectDay(step, step);
                                 },
-                                child: const Padding(
-                                  padding: EdgeInsets.all(4),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4),
                                   child: Icon(
                                     LucideIcons.chevronRight,
                                     size: 18,
@@ -368,7 +368,7 @@ class CalendarScreen extends ConsumerWidget {
                           onPageChanged: (foc) => ref
                               .read(calendarViewProvider.notifier)
                               .setFocusedDay(foc),
-                          calendarStyle: const CalendarStyle(
+                          calendarStyle: CalendarStyle(
                             todayDecoration: BoxDecoration(
                               color: AppColors.primarySoft,
                               shape: BoxShape.circle,
@@ -527,46 +527,6 @@ class CalendarScreen extends ConsumerWidget {
                           );
                         }
                       }),
-                    const SizedBox(height: 20),
-                    // Bottom "+ Add Event" CTA Pill Button
-                    Container(
-                      width: double.infinity,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppRadius.pill),
-                        boxShadow: AppShadows.fab,
-                      ),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppRadius.pill),
-                          ),
-                        ),
-                        onPressed: () async {
-                          await EventFormSheet.show(
-                            context,
-                            initialDate: selectedDay,
-                          );
-                        },
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(LucideIcons.plus, size: 18),
-                            SizedBox(width: 6),
-                            Text(
-                              'Add Event',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),

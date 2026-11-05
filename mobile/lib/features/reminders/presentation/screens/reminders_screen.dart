@@ -169,7 +169,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                   children: [
                     IconButton(
                       onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const Icon(
+                      icon: Icon(
                         LucideIcons.chevronLeft,
                         size: 22,
                         color: AppColors.textPrimary,
@@ -202,7 +202,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                     IconButton(
                       onPressed: () => ReminderFormSheet.show(context),
                       tooltip: 'Tambah Pengingat',
-                      icon: const Icon(
+                      icon: Icon(
                         LucideIcons.plus,
                         size: 21,
                         color: AppColors.primary,
@@ -213,7 +213,7 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
                           .read(remindersControllerProvider.notifier)
                           .refresh(),
                       tooltip: 'Refresh',
-                      icon: const Icon(
+                      icon: Icon(
                         LucideIcons.refreshCw,
                         size: 19,
                         color: AppColors.textPrimary,
@@ -393,9 +393,9 @@ class _PermissionBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(LucideIcons.bellOff, size: 18, color: AppColors.warning),
+          Icon(LucideIcons.bellOff, size: 18, color: AppColors.warning),
           const SizedBox(width: 10),
-          const Expanded(
+          Expanded(
             child: Text(
               'Izin notifikasi nonaktif. Pengingat tidak akan muncul.',
               style: TextStyle(
@@ -553,7 +553,7 @@ class _ReminderCard extends StatelessWidget {
                         onPressed: onEditTime,
                         tooltip: 'Ubah waktu',
                         visualDensity: VisualDensity.compact,
-                        icon: const Icon(
+                        icon: Icon(
                           LucideIcons.pencil,
                           size: 16,
                           color: AppColors.textSecondary,
@@ -564,7 +564,7 @@ class _ReminderCard extends StatelessWidget {
                         onPressed: onCancel,
                         tooltip: 'Batalkan',
                         visualDensity: VisualDensity.compact,
-                        icon: const Icon(
+                        icon: Icon(
                           LucideIcons.bellOff,
                           size: 16,
                           color: AppColors.warning,
@@ -575,7 +575,7 @@ class _ReminderCard extends StatelessWidget {
                         onPressed: onDelete,
                         tooltip: 'Hapus',
                         visualDensity: VisualDensity.compact,
-                        icon: const Icon(
+                        icon: Icon(
                           LucideIcons.trash2,
                           size: 16,
                           color: AppColors.error,

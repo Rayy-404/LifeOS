@@ -38,7 +38,7 @@ class ErrorStateCard extends StatelessWidget {
                   color: AppColors.errorPastel,
                   borderRadius: BorderRadius.circular(AppRadius.iconTile),
                 ),
-                child: const Icon(
+                child: Icon(
                   LucideIcons.circleAlert,
                   color: AppColors.error,
                   size: 26,

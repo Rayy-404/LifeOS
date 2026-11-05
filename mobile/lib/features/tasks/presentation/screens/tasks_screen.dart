@@ -147,7 +147,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 LucideIcons.trendingUp,
                                 size: 16,
                                 color: AppColors.primary,
@@ -195,14 +195,14 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                                 horizontal: 12,
                                 vertical: 14,
                               ),
-                              prefixIcon: const Icon(
+                              prefixIcon: Icon(
                                 LucideIcons.search,
                                 size: 19,
                                 color: AppColors.textSecondary,
                               ),
                               suffixIcon: _searchController.text.isNotEmpty
                                   ? IconButton(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         LucideIcons.x,
                                         size: 16,
                                         color: AppColors.textSecondary,
@@ -249,7 +249,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                                   child: Container(
                                     width: 7,
                                     height: 7,
-                                    decoration: const BoxDecoration(
+                                    decoration: BoxDecoration(
                                       color: AppColors.primary,
                                       shape: BoxShape.circle,
                                     ),
@@ -510,7 +510,7 @@ class _TodaysMomentumCard extends StatelessWidget {
                           value: animatedValue,
                           strokeWidth: 3.5,
                           backgroundColor: AppColors.surfaceMuted,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
+                          valueColor: AlwaysStoppedAnimation<Color>(
                             AppColors.primary,
                           ),
                           strokeCap: StrokeCap.round,
@@ -553,7 +553,7 @@ class _TodaysMomentumCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               LucideIcons.trendingUp,
               size: 20,
               color: AppColors.textSecondary,
@@ -589,7 +589,7 @@ class _ProTipBanner extends StatelessWidget {
               color: AppColors.skyPastel,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               LucideIcons.lightbulb,
               size: 20,
               color: AppColors.sky,

@@ -227,7 +227,7 @@ class _TimezoneChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
+          Icon(
             LucideIcons.globe,
             size: 16,
             color: AppColors.textSecondary,
